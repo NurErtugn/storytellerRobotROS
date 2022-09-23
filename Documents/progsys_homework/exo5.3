@@ -1,0 +1,62 @@
+//définir le type « octet » comme « unsigned char ».
+ 
+/*
+SORU : bit wise transformationun nasil yapiligini anlamadim affiche binaire >> for loop 
+*/
+typedef unsigned char Octet;
+//une fonction « afficher_binaire » qui prend un octet et l'affiche en binaire
+static inline void affiche_bit(const octet c,
+                               const octet position_pattern)
+{
+  putchar(c & position_pattern ? '1' : '0');
+  /*simdi and math operator umu kullaniyorum x&y == 1 iff x=y=1 else 0 dur  burada x&y =1 donerse 1 0 donerse 0 atar put char imin icine
+  int putchar(int char) method in C is used to write a character, of unsigned char type, to stdout. This character is passed as the 
+  parameter to this method.
+  prints the char right away
+ */ 
+}
+ 
+void affiche_binaire(const octet c) {
+  for(octet mask = 0x80; mask; mask >>= 1) 
+  /*A mask defines which bits you want to keep, and which bits you want to clear.  
+  masking ==> bitwise operation yapmami saglar 
+  0x01  ==> least significant bit set , the decimal value is 1  , en sagdaki it i doner ve onun disindaki her bit 0 a esitlenir 
+  0x80 ==> most significant bit of an 8.bit byte set, en soldaki bit i doner  onun disindaki her bit 0 a esitlenir 
+ octet mask =0x80 burada yeni bir octet 8 bit yaoisi yarattim ve adi mask onu 0x80 e esitledim 
+ >>=	Right shift AND assignment operator.	C >>= 2 is same as C = C >> 2
+ then here  mask >>=1 meand mask = mask>>2 (mask i right  shift yapiyorum 2yana )
+ islemi her gerceklestirdigi zaman surekli right a shift eder ve boylece binary hallerini doner 
+  */
+     affiche_bit(c, mask);
+}
+
+char affiche( size_t size , Octet o){
+    //le size_t ; on pourra par exemple utiliser le format printf "%02zu" pour cela
+    printf("%02zu", size);
+    affiche_binaire(c);
+    printf("%3u", (unsigned int) c);
+    if ((c >= 32) && (c <= 126)) {
+    printf("'%c'", c);
+  }
+    
+}
+
+dump_memc(const Octet* o , size_t N){
+    // how to return the adress by &a ile !!
+    printf("%p", o)
+    for(size_t =0; i<N; ++i){
+
+    }
+}
+/*
+void dump_mem(const octet* ptr, size_t length)
+{
+   s
+  printf("A partir de %p :\n", ptr);
+  for (size_t i = 0; i < length; ++i) {
+    affiche(i, ptr[i]);
+  }
+}
+*/
+
+
