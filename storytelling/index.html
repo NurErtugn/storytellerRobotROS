@@ -1,0 +1,672 @@
+<head>
+    <meta charset="utf-8">
+	<meta http-equiv="Cache-control" content="public">
+
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>Apha-Mini Storytime!</title>
+	<!-- Style taken from https://raw.githubusercontent.com/hypertexthero/htmlformtofile/master/index.html-->
+	<style type="text/css" media="screen">
+		body {font-family:verdana, sans-serif;  font-weight: 700; color:#271d1d; background:#d2e0d1; padding:20px; text-align:center;}
+		h1 {font-size:50px; font-weight: bold; text-align:center; color: #920be1;}
+		label {font-size:20px;font-weight: bold;}
+		button {margin-left:205px; padding:5px; margin-top:5px; font-size:16px;}
+		textarea {width:400px; font-size:16px; font-family: courier, "courier new", monospace; margin:0 0 5px 0; padding:5px; border:1px solid #eee; }
+		select {margin:0 0 5px 0;}
+		::placeholder {color:#d4d2d2;}
+		.slider{
+			width: 400px;
+			height: 30px;
+			background: #d3d3d3;
+			outline: none;
+			opacity: 0.7;
+			-webkit-transition: .2s;
+			transition: opacity .2s;
+		}
+
+		.container{
+			display: flex;
+			justify-content: space-around;
+			margin-bottom: 10px;
+		}
+
+		textarea{
+			width: 75%;
+			height: 100px;
+			margin-top: 10px; 
+			background-color: #ff8861;
+			overflow-y: hidden; 
+					
+		}
+
+		#storyPrompt {
+			background-color: rgba(124, 255, 107, 0.97);
+		}
+		#editableText{
+			background-color:#95eff0;
+			display: none;
+		}
+
+		.button-container {
+			text-align: center;
+			margin-top: 10px;
+		}
+		button{
+			margin: 5px;
+			padding: 5px  10px;
+			font-family: Arial, Helvetica, sans-serif;
+			font-weight: 900;
+			padding: 15px;
+			letter-spacing: 1px;
+			font-size: 20px;
+			background-color: rgb(255, 220, 78);
+			border: 5px solid rgb(248, 149,s 19);
+			cursor: pointer; /*cursor to hand pointer*/			
+		}
+		#submit-button:hover{
+			background-color: rgb(248, 149, 19);
+		}
+	
+		
+		#mainButtons-container{
+			text-align: center;
+			padding: 20px;
+		}
+		#main-button{
+			font-family: Arial, Helvetica, sans-serif;
+			font-weight: 900;
+			padding: 50px;
+			letter-spacing: 1px;
+			font-size: 40px;
+			background-color: rgb(244, 159, 231);
+			border: 5px solid blueviolet;
+			cursor: pointer; /*cursor to hand pointer*/
+		}
+		#main-button:hover{
+			background-color: blueviolet;
+		}
+		#submit-button{
+			font-family: Arial, Helvetica, sans-serif;
+			font-weight: 900;
+			padding: 15px;
+			letter-spacing: 1px;
+			font-size: 20px;
+			background-color: rgb(255, 220, 78);
+			border: 5px solid rgb(248, 149,s 19);
+			cursor: pointer; /*cursor to hand pointer*/			
+		}
+		#submit-button:hover{
+			background-color: rgb(248, 149, 19);
+		}
+	
+		
+	</style>
+</head>
+ 
+<body onload="updateText() ">
+    <h1> &#x1F916; &#x1F916; Storytime with Alpha-Mini &#x1F916; &#x1F916;  !</h1>
+	<br>
+		<div id = "mainButtons-container">
+			<button id="main-button" onclick="showStory()">Start Storytime </button>
+			<button id = "main-button" onclick="showHistory(this)">Show History</button> 
+		</div>
+		<!--Area to show saved history-->
+		<div id="savedHistory"></div>	
+		
+	
+	<div id="language_selector" style = "display:none">
+		<label > &#x1F916; : What should be the language of your story ? </label><br>
+	<br>
+
+		<input type="radio" id="en" name="language" value="0">
+    	<label for="en"> &#x1F5E3;: English</label><br>
+    	<input type="radio" id="fr" name="language" value="1">
+    	<label for="fr"> &#x1F5E3;:Francais</label><br>  
+    	<input type="radio" id="de" name="language" value="2">
+    	<label for="de"> &#x1F5E3;:Deutsch</label><br><br>
+		
+		<input type="button" id="submit-button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="sendLanguageData(this)"/>
+	</div>
+	
+
+	<div id="story_input" style="display:none">
+	<form method="post" id="story-form">
+		<!--Radio buttons for level of ai of the story-->
+	<label >&#x1F916;: First Things First... How much should i help you with your story :</label><br>
+	<br>
+
+		<input type="radio" id="ai0" name="ai" value="0" onclick="hideSlider()">
+    	<label for="ai0">&#x1F5E3;: I'll write you the story and you will tell it out loud ! </label><br>
+    	<input type="radio" id="ai1" name="ai" value="1" onclick="showSlider()">
+    	<label for="ai1">&#x1F5E3;: I will give an explanation, and i want you to turn into a story .</label><br>  
+    	<input type="radio" id="ai2" name="ai" value="2" onclick="showSlider()">
+    	<label for="ai2">&#x1F5E3;: I will give you a topic, and you will shape the story .</label><br>
+		<input type="radio" id="ai3" name="ai" value="3" onclick="showSlider()">
+    	<label for="ai3">&#x1F5E3;: I will write a part of the story, and  you will complete it. </label><br><br>
+	
+	<br>
+		<!-- Story or prompt to be inputted-->
+	<label for="story-form">&#x1F916;:Ready for your next step ? Write to me based on the option you chose:</label><br>
+
+		<textarea form="story-form" id="story" cols="40" rows="10" placeholder="&#x1F5E3;: Once upon a time..."></textarea>
+		<br>	
+	<br>
+		<div id="story_length_slider" style="display:none">
+			<p>&#x1F916;: Story length: <span id="length"></span> words</p>
+			<input type="range" min="50" max="600" value="400" class="slider" id="story_length"> 
+		</div>
+		
+
+	</form>
+	<br>
+	<p>&#x1F916;: Moving Right Along; Are you ready to generate your first story with me ? Click to "Clear All" button to restart !</p>
+	<button type="submit" id= "submit-button" onclick="sendStoryData(this)">&#x1F44D; Submit</button>
+	<button id="submit-button" onclick = "clearAll(this)"> &#x1F44E; Clear All</button>
+	
+	
+    <h1>&#x1F916;: Storytelling Session</h1>
+	<div class="container">
+		<textarea id="editableText" style="display:none;" readonly ></textarea>
+		<textarea id="storyPrompt" readonly >Waiting for the story...</textarea>
+	</div>
+
+	<div class="button-container">	
+		<button id="editButton">Edit </button>
+		<button id="goBackButton" style="display: none;">Go back</button>
+		<button id="sendModifiedButton" style="display: none;">Send Modified Version</button>
+		<button id="keepStoryButton">Keep Story</button>
+		<button id = "regenerateButton">Regenate Story</button>		
+	</div>
+
+	<div id="question_selector" style = "display:block">
+		<label > &#x1F916; :  Optionally, do you want to ask questions about this story to the audience? </label><br>
+	<br>
+
+		<input type="radio" id="yes" name="question" value="0">
+    	<label for="yes"> &#x1F5E3;: Yes</label><br>
+    	<input type="radio" id="no" name="question" value="1">
+    	<label for="no"> &#x1F5E3;:No </label><br>  
+    	
+		<input type="button" id="submit-button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="sendQuestionData(this)"/>
+	</div>
+
+	<div id="answer_input" style="display:none">
+			<!--Radio buttons for level of ai of the query generation-->
+		<label >&#x1F916;: How much help do you need while writing your questions:</label><br>
+		<br>
+			<input type="radio" id="ai_0" name="ai_answer" value="0" >
+			<label for="ai_0">&#x1F5E3;: No help. I will write my own questions ! </label><br>
+			<input type="radio" id="ai_1" name="ai_answer" value="1">
+			<label for="ai_1">&#x1F5E3;: I prefer auto-generated questions .</label><br>  
+	
+			<input type="button" id="submit-button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="sendAnswerData(this)"/>
+		</div>
+
+	<div id = "query_human" style="display:none">
+		<!--Questions about the story to be inputted-->
+		<label for="'story-form' "> &#x1F916; : Write maximum 3 questions to be asked directly by the Alpha-Mini about the story(One Question per line): </label><br>
+		<br>
+
+			<textarea form="story-form" id="questions_to_ask" cols="40" rows="5" placeholder="Question 1
+Question 2
+Question 3
+..." ></textarea>
+
+		<div class="button-container">
+			<input type="button" id="submit-button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="sendQuestionToAskData()"/>
+		</div>	
+	
+	</div>
+
+	<div id = "submitToSeeAnswers" style="display: none;">
+		<label for= "'story-form' "> Do you also wanna see possible answers to your questions?</label><br>
+		<br>
+		<input type="radio" id="submit_ans0" name="submitHum" value="0" >
+		<label for="ai_0">&#x1F5E3;: Yes </label><br>
+		<input type="radio" id="submit_ans1" name="submitHum" value="1">
+		<label for="ai_1">&#x1F5E3;: No </label><br>  
+			<input type="button" id="submit-button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="sendToSeeAns()"/>
+	</div>
+
+	<div id = "query_ai" style="display:none">
+		<!--Questions about the story to be inputted by AI -->
+		<label for="'story-form' "> &#x1F916; : Generated Questions with answers and citations from the story:<br> 
+			Buttons Explained: <br>
+			Keep All : if you wanna keep all the generated questions with answers  <br>
+			Select : if you want to keep some questions but not all, select the ones you want to Keep <br>
+			Regenerate : if you want to regenerate questions <br>
+			Modify : if you want to modify questions , please provide answers too and dont change the format<br>
+		</label><br>
+		<br>
+			<textarea form="story-form" id="questions_ai" cols="40" rows="5" placeholder="Generating..." ></textarea>
+
+			<div class="button-container">
+				<button id="keepButton2">Keep All</button>
+				<button id="selectButton">Select </button>
+				<button id = "regenerateButton2">Regenate Questions</button>	
+				<button id = "modifyButton2">Modify </button>	
+			</div>
+	</div>
+
+	<div id = "buttonAfterModified" class="button-container" style="display:none">
+		<button id = "submitButton2">Submit </button>	
+	</div>
+
+	<div id="select_question" style="display:none">
+		<form>
+			<p>Please select the question(s) you want to keep (you can choose more than one):</p>
+
+			<input type="checkbox" id="1." name="1." value="1.">
+			<label for="1.">Keep Question 1</label><br>
+
+			<input type="checkbox" id="2." name="2." value="2.">
+			<label for="2.">Keep Question 2</label><br>
+
+			<input type="checkbox" id="3." name="3." value="3.">
+			<label for="3.">Keep Question 3</label><br>
+
+			<div class="button-container">
+				<input type="button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="sendSelectedQuestions()"/>
+			</div>
+
+		</form>
+	</div>
+	
+
+	<p>&#x1F916;:Once the Alpha-Mini has finished telling the story, <br>
+-Press LEFT ARROW and then the Clear All button to tell a new story (go to Step 1), <br>
+-RIGHT ARROW to go to the questions,<br>
+-ESC and then the Exit button to finish.</p>
+    <p>&#x1F916;:To go through the questions, press DOWN ARROW, until QT says there are no more questions.</p>
+	<p>&#x1F916;: Once the questions are finished, <br>
+-Press LEFT ARROW and then the Clear All button to tell a new story (go to Step 1),	<br>
+-ESC and then the Exit button to finish.
+	</p>
+	<p></p>
+	<button onclick="stopServer()">Exit</button>
+	<!--Button to registered web client input-->
+	<button onclick="saveTextBoxes()">Save History</button>	
+	
+	
+	</div>
+</body>
+ 
+<script>
+	//function to update the height of the text area based on the server message size
+	function updateHeight(textValue){
+		textValue.style.height = 'auto'; // reset height to shrink grow as needed
+		textValue.style.height = textValue.scrollHeight + 'px'; // set height to to the text value height
+
+	}
+
+	var slider = document.getElementById("story_length");
+	var output = document.getElementById("length");
+	output.innerHTML = slider.value;
+	slider.oninput = function() {
+		output.innerHTML = this.value;
+	}
+		
+	var regenerateButton= document.getElementById("regenerateButton");
+	var keepButton = document.getElementById("keepStoryButton");
+	var editButton= document.getElementById("editButton");
+	var storyPrompt = document.getElementById("storyPrompt");
+	var goBackButton=  document.getElementById("goBackButton");
+	var editableTextArea= document.getElementById("editableText");
+	var submitButton2= document.getElementById("submitButton2");
+
+	//button for query_human if they want auto generated answers for their questions
+	var submitToSeeAnswersButton = document.getElementById("submitToSeeAnswers");
+
+	// buttons for the AI generated questions
+			
+	var keepButton2 = document.getElementById("keepButton2");
+	var selectButton = document.getElementById("selectButton");
+	var regenerateButton2= document.getElementById("regenerateButton2");
+	//var answer_citations = document.getElementById("answer_citations");
+	var modifyButton2 = document.getElementById("modifyButton2");
+	var question_ai_box = document.getElementById("questions_ai")
+	var selectQuestions = document.getElementById("select_question");
+
+	selectButton.addEventListener("click", function(){
+		selectQuestions.style.display="block";
+		
+	})
+
+	regenerateButton2.addEventListener('click',regenerateQuestions);
+
+	function regenerateQuestions(){
+		const socket = new WebSocket('ws://localhost:10000');
+		socket.addEventListener('open', function(event){
+			socket.send("Regenerate ");
+			socket.close;
+		});	
+		
+	}
+
+	submitButton2.addEventListener('click', submitModifiedQuestions);
+
+	submitToSeeAnswersButton.addEventListener('click', submitToSeeAnswersFunction);
+
+	//TODO
+	function submitToSeeAnswersFunction(){
+		socket.addEventListener('open', function (event) {
+			var answer = document.querySelector('input[name="submitHum"]:checked').value;
+			if(answer == 0){
+				socket.send(answer);
+				socket.close;
+			}
+			});
+	}	
+
+	function submitModifiedQuestions(){
+		const socket = new WebSocket('ws://localhost:10000');
+		socket.addEventListener('open', function(event){
+			var modified_questions = question_ai_box.value;
+			socket.send("Modified " + modified_questions);
+			socket.close;
+		});	
+		submitButton2.disabled = true;
+		
+	}
+
+	modifyButton2.addEventListener("click", function(){
+		// make the area editable 
+		if (question_ai_box.hasAttribute('readonly')){
+			question_ai_box.removeAttribute('readonly');
+			keepButton2.disabled=true;
+			selectButton.disabled= true;
+			regenerateButton2.disabled = true;
+			this.disabled=true;
+			document.getElementById("buttonAfterModified").style.display= "block";
+		}
+	})
+
+	keepButton2.addEventListener("click", function(){
+		const socket = new WebSocket('ws://localhost:10000');
+		socket.addEventListener('open', function(event){
+			socket.send("keepQuestions");
+			socket.close();
+		});	
+		this.disabled=true;	
+		modifyButton2.disabled= true;
+		selectButton.disabled=true;
+		regenerateButton2.disabled=true;		
+	})
+
+	//if i pressed on the keep story
+	keepButton.addEventListener("click",function(){
+		regenerateButton.disabled=true;
+		editButton.disabled = true;
+		const socket = new WebSocket('ws://localhost:10000');
+		socket.addEventListener('open', function(event){
+			socket.send("keepStory");
+			socket.close();
+		});		
+		this.disabled = true;
+	});
+	
+	// edit the story click received
+	editButton.addEventListener("click",function(){
+		if (storyPrompt.hasAttribute('readonly')){
+			storyPrompt.removeAttribute('readonly');
+			storyPrompt.focus();
+			keepButton.disabled = true;
+			/*regenerateButton.style.display="none";*/
+			this.textContent= "Save and Keep The Story";
+			this.id = 'saveButton';
+			editableTextArea.value= storyPrompt.value;
+			editableTextArea.style.display="block";
+			goBackButton.style.display= "block";
+
+			saveButton = document.getElementById('saveButton');
+			saveButton.addEventListener('click',saveStory);
+			
+			updateHeight(editableTextArea);
+		} else {
+			storyPrompt.setAttribute('readonly', 'true');
+			this.textContent= "Edit";
+		}
+	});
+
+	
+
+	goBackButton.addEventListener('click', function(){
+		storyPrompt.value= editableTextArea.value;
+		editableTextArea.style.display= "none";
+		this.disabled = true;
+		sendButton.disabled = true;
+		editButton.style.display='inline'	
+	})
+
+	regenerateButton.addEventListener('click',regenerateStory);
+
+	function regenerateStory(){
+		const socket = new WebSocket('ws://localhost:10000');
+        socket.addEventListener('open', function (event) {
+			var text_to_regenerate = storyPrompt.value;			
+			var message = "regenerate" + " " + text_to_regenerate; 
+			editButton.disabled = true; 
+			goBackButton.disabled = true;
+			socket.send(message);	
+            socket.close()
+        });
+    };	
+
+	function saveStory(){
+		const socket = new WebSocket('ws://localhost:10000');
+        socket.addEventListener('open', function (event) {
+			var updateText = storyPrompt.value;			
+			var message =  updateText; 
+			editButton.disabled = true;
+			goBackButton.disabled = true;
+			regenerateButton.disabled = true;
+			editableTextArea.style.display="none";
+			socket.send(message);	
+            socket.close()
+        });
+    };	
+
+	function hideSlider(){
+		document.getElementById("story_length_slider").style.display = "none";
+	}
+	function showSlider(){
+		document.getElementById("story_length_slider").style.display = "block";
+	}
+
+	function clearAll(some){
+		some.disabled=true;
+		document.getElementById('story-form').reset();
+		document.getElementById("length").innerHTML = 400;
+		hideSlider();
+	}
+
+	var ws = new WebSocket("ws://localhost:10000/");
+        
+    ws.onmessage = function(event) {
+		var message = event.data;		
+		
+		if(message.toLowerCase().trim().startsWith("questions:")){
+			const queryAI = document.getElementById('questions_ai');
+			queryAI.value = message;
+			updateHeight(queryAI);
+		}else{
+            // Assuming the message is the story or feedback to be displayed
+			const storyPromptMain =document.getElementById('storyPrompt');
+        	storyPromptMain.value = message;
+			updateHeight(storyPromptMain);
+			
+
+		}
+        };
+
+    ws.onopen = function(event) {console.log("Connection opened"); };
+
+    ws.onerror = function(error) {csonsole.log('WebSocket Error: ' + error);};
+
+    ws.onclose = function(event) {console.log("Connection closed"); };
+
+	
+	const sendLanguageData = (some) => {
+        const socket = new WebSocket('ws://localhost:10000');
+        socket.addEventListener('open', function (event) {
+			some.disabled=true;
+            var language = document.querySelector('input[name="language"]:checked').value;
+			document.getElementById("story_input").style.display = "block";
+            socket.send(language);	
+            socket.close()
+        });
+    }
+
+	const sendSelectedQuestions = () => {
+		const socket = new WebSocket('ws://localhost:10000');
+        socket.addEventListener('open', function (event) {
+			const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+			var selectedOptions = [];
+			checkboxes.forEach(checkbox=>{
+				selectedOptions.push(checkbox.value);
+			});
+			socket.send("Selected "+ selectedOptions);	
+
+		});
+	}
+
+	// yes or no question event for should we generate questions for the story 
+	const sendQuestionData = (some) => {
+		some.disabled=true;
+		const socket =new WebSocket('ws://localhost:10000');
+		socket.addEventListener('open', function (event) {
+			var question = document.querySelector('input[name="question"]:checked').value;
+				socket.send(question);  // sends 'yes' or 'no'
+				if(question== '0'){
+					// make the survey thing pop up 
+					document.getElementById("answer_input").style.display = "block";
+				}
+				socket.close()		
+			});
+		}
+
+// Picking the levels of AI help 
+	const sendAnswerData = (some) => {
+		some.disabled=true;
+		const socket =new WebSocket('ws://localhost:10000');
+        socket.addEventListener('open', function (event) {
+			var answer = document.querySelector('input[name="ai_answer"]:checked').value;
+			if(answer== '0'){ // means i ask for no help im gonna write my questions 
+				document.getElementById("query_human").style.display= "block";
+			}
+			else if(answer== '1'){
+				document.getElementById("query_ai").style.display= "block";
+				document.getElementById("questions_ai").setAttribute('readonly', 'true');
+				document.getElementById("question_answer")				
+			} 				
+			socket.send("option" + answer + "is chosen");  // sends 'yes' or 'no'
+			socket.close();	
+		});
+	}	
+
+    const sendStoryData = (some) => {
+        const socket = new WebSocket('ws://localhost:10000');
+        socket.addEventListener('open', function (event) {
+			some.disabled=true;
+            var ai = document.querySelector('input[name="ai"]:checked').value;
+            var story = document.getElementById("story").value;
+			var length = document.getElementById("length").innerHTML;
+            var message = ai + "|" + story + "|"  + length; 
+            socket.send(message);	
+            socket.close();
+        });
+    }
+
+	const sendQuestionToAskData = () => {
+		const socket =new WebSocket('ws://localhost:10000');
+        socket.addEventListener('open', function (event) {
+		//TODO: MAYBE DISABLE CLICKING ON THE SUBMIT BUTTON
+			questions_box = document.getElementById("questions_to_ask");
+			questions_box.setAttribute('readonly', 'true');
+			var questionToAskData = questions_box.value;
+			submitToSeeAnswersButton.style.display="block";
+			socket.send(questionToAskData);
+			socket.close()
+		});
+	} 
+	
+    const stopServer = () => {
+        const socket = new WebSocket('ws://localhost:10000');
+        socket.addEventListener('open', function (event) {
+            socket.send("close");
+			closeWindow();
+            socket.close()
+        });
+    }
+
+	function closeWindow(){
+		window.open('', '_parent','');
+		window.close();
+	}
+
+	//function to save everything on the page
+	function saveTextBoxes(){
+		console.log("save Entries function is called ");
+		// text area values
+		const storyValue = document.getElementById('story').value; 
+		const storyPrompt = document.getElementById('storyPrompt').value;
+		const humanQuery = document.getElementById('questions_to_ask').value;
+		const aiQuery =  document.getElementById('questions_ai').value;
+ 
+		//Load, or create new array
+		const entries = JSON.parse(localStorage.getItem('sessionEntry')) || [];
+		const date= new Date().toISOString();
+		entries.push({date, storyValue, storyPrompt, humanQuery, aiQuery});
+		localStorage.setItem('sessionEntry', JSON.stringify(entries));
+
+	}
+	// function to start generating storytime
+	function showStory(){
+		document.getElementById("language_selector").style.display = "block";
+
+	}
+
+	// function to see previously saved things
+	function showHistory(button){
+		console.log("show Entries function is called ");
+		const entryArea = document.getElementById('savedHistory');
+		const entryThings = JSON.parse(localStorage.getItem('sessionEntry')) || [];
+		console.log("Entries retrieved:", entryThings);
+		// sort entries by timestamp in decreasing order 
+		entryThings.sort((current,next) => new Date(next.timestamp)- new Date(current.timestamp));
+
+		const savedHistory = document.getElementById('savedHistory')
+
+		// change the text of the button
+		if(button.innerText === "Show History"){
+			button.innerText = "Close";
+			// generate entry block  for each entry
+			entryArea.innerHTML = entryThings.map(prompt => `
+			<div >
+				<h4>Saved on: ${prompt.date}</h4>
+				<p>Story Topic : ${prompt.storyValue || "Story topic is not specified"}</p>
+				<p>Story : ${prompt.storyPrompt || "Story not generated"}</p>
+				<p>Human Generated questions: ${prompt.humanQuery || "Questions are not generated"}</p>
+				<p>Autogenerated questions: ${prompt.aiQuery || "Questions are not generated"}</p>
+				<p>______________________________________________________________________________________________________________________________________________________</p>
+			</div>
+			`).join(' ');	
+			savedHistory.style.display= 'block';	 
+		}else if(button.innerText=== "Close"){
+			//<div id="savedHistory"></div>	
+			savedHistory.style.display= 'none';
+			button.innerText ="Show History";
+	
+		}
+		else{
+			button.innerText ="Show History";
+		}
+
+	
+
+	}
+ 
+</script>
+ 
+</html>
