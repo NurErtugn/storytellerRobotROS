@@ -19,6 +19,10 @@ import server #server related functioonality
 from flask import Flask 
 from server import send_data 
 import re
+import rospy
+from std_msgs.msg import String
+
+
 #https://www.geeksforgeeks.org/how-to-convert-python-dictionary-to-json/ + start pahr : check drafts and start 
 #QT 
 #NO ROBOT SUPPORT: Mock_Robot()
@@ -141,7 +145,7 @@ class Greetings(smach.State):
 #Storytelling state of the state machine. Here the user has time to fill out the story generation form and QT will recite the story
 class Storytelling(smach.State):
     def __init__(self): #constructor  method of the greetings class. initialises the state with the specified outcomes . will indicate possible transitions to other states
-        smach.State.__init__(self, outcomes=['nextGoodbye', 'clientFeedback'], output_keys=['story_prompt','sl', 'selectedQuestions'])
+        smach.State.__init__(self, outcomes=['nextGoodbye', 'clientFeedback'], output_keys=['story_prompt','sl', 'selectedQuestions', 'answers'])
         
     def execute(self, userdata): #defines the behaviour of the greetings state when its executed 
         global next_global_state
@@ -161,6 +165,7 @@ class Storytelling(smach.State):
         story_prompt = inputs[1]
         sl = int(inputs[2]) #STORYLENGHT , CHANGE LATER THE VARIABLE NAME 
         selectedQuestions= " "
+        answers = " "
 
 
         level_1_prompt = "Make the following text into a story, understandable by a 5 year old, using characters and dialogue: "
@@ -184,8 +189,12 @@ class Storytelling(smach.State):
                 story_prompt== ai.complete_story(story_prompt + "Complete the rest in German" + "under" + str(sl) + "words")
             else:
                 story_prompt= ai.complete_story(story_prompt + "Complete the rest of the story in English" + "under" + str(sl) + "words")
-
-
+                #TODO: doesnt really output the beginning of what user writes down 
+        elif(ai_level==4):
+            story_prompt= ai.gSbA(story_prompt, str(sl))
+            #TODO: different language translations
+        
+            
         #sentences_with_sentiment = classifier.classify(story_prompt, AUTO_SPLIT)
         print("INPUT_1")
         print(inputs[1])
@@ -193,15 +202,13 @@ class Storytelling(smach.State):
        # userdata.story_prompt = inputs[1] + story_prompt 
         userdata.story_prompt = story_prompt
         userdata.selectedQuestions = selectedQuestions
+        userdata.answers = answers
 
         userdata.sl = sl
     
         print(story_prompt)
         print()
-
-       
-    
-        
+            
         next_global_state = 'clientFeedback'
       
         return next_global_state
@@ -209,7 +216,7 @@ class Storytelling(smach.State):
 class ClientFeedback(smach.State):
     def __init__(self): 
         smach.State.__init__(self,outcomes= ['keepStory', 'modifyStory','regenerateStory'],
-                              input_keys=['sl','story_prompt', 'selectedQuestions'],output_keys=['story_prompt', 'sl', 'selectedQuestions'])  
+                              input_keys=['sl','story_prompt', 'selectedQuestions', 'answers'],output_keys=['story_prompt', 'sl', 'selectedQuestions', 'answers'])  
 
     def execute(self,userdata):
         global next_global_state
@@ -220,6 +227,7 @@ class ClientFeedback(smach.State):
             sl = userdata.sl
         userdata.sl = sl
         selectedQuestions= userdata.selectedQuestions
+        answers = userdata.answers
         
         if 'story_prompt' in userdata:  # Check if 'story_prompt' exists in userdata
             story_prompt = userdata.story_prompt
@@ -240,8 +248,14 @@ class ClientFeedback(smach.State):
             userdata.story_prompt=story_prompt
             next_global_state = 'keepStory'
             return next_global_state
-            
-    
+        
+        elif(local_data.split(' ', 1)[0]== 'suggestions'):
+            suggestions = local_data.split(' ',1)[1]
+            #TODO
+            # ai generate based on suggestions call.
+            #send it back to client feedback 
+            #create a new state based on suggestion state 
+            #do everything there and send it again to client feedback    
         elif(local_data.split(' ', 1)[0]=='regenerate'):
             story_prompt= local_data.split(' ', 1)[1]
             userdata.story_prompt=story_prompt
@@ -257,12 +271,13 @@ class ClientFeedback(smach.State):
             
 class KeepStory(smach.State): #robot tells the story out loud 
     def __init__(self): 
-        smach.State.__init__(self,outcomes=['repeatStory','nextEvaluation','nextGoodbye', 'queryGeneration'],input_keys=['story_prompt', 'selectedQuestions'], output_keys=['story_prompt', 'selectedQuestions'])
-    
+        smach.State.__init__(self,outcomes=['repeatStory','nextEvaluation','nextGoodbye', 'queryGeneration'],input_keys=['story_prompt', 'selectedQuestions', 'answers'], output_keys=['story_prompt', 'selectedQuestions', 'answers'])
+        
     def execute(self,userdata):
         print("story kept. Proceeding")
         story_prompt=userdata.story_prompt 
         selectedQuestions= userdata.selectedQuestions
+        answers = userdata.answers
 
         sentences_with_sentiment = classifier.classify(story_prompt, AUTO_SPLIT)
         print(story_prompt)
@@ -283,6 +298,9 @@ class KeepStory(smach.State): #robot tells the story out loud
                    # robot.playGesture(s)
                    # qt_says(sentence, speech=robot.say_serv) #speak without lip sync as showing emotion 
                     #rospy.sleep(0.2)
+        
+   #     self.subAlphaSay.publish(story_prompt)
+
         local_data = server.await_response()
         print("LOCAL DATA RECIEVED  FOR KEEP STORY STATE : ", local_data)
         
@@ -306,12 +324,13 @@ class KeepStory(smach.State): #robot tells the story out loud
     
 class QueryGeneration(smach.State):
     def __init__(self):
-        smach.State.__init__(self,outcomes=['queryGeneration_0', 'queryGeneration_1'],input_keys=['story_prompt','selectedQuestions'], output_keys=['story_prompt', 'selectedQuestions'])
+        smach.State.__init__(self,outcomes=['queryGeneration_0', 'queryGeneration_1'],input_keys=['story_prompt','selectedQuestions', 'answers'], output_keys=['story_prompt', 'selectedQuestions', 'answers'])
     
     def execute(self,userdata):
         print("Query generation is selected ")
         story_prompt=userdata.story_prompt 
         selectedQuestions = userdata.selectedQuestions
+        answers = userdata.answers
 
         local_data = server.await_response()
         print("LOCAL DATA RECIEVED FOR QUERY GENERATION STATE: ", local_data)
@@ -319,14 +338,11 @@ class QueryGeneration(smach.State):
         #queryGeneration_0, queryGeneration_1, queryGeneration_2'
 
         if(local_data=='option0is chosen'): 
-            print("im here")
             next_global_state= 'queryGeneration_0'
             return next_global_state
         elif(local_data=='option1is chosen'): 
             next_global_state= 'queryGeneration_1'
             return next_global_state
-      #  elif(local_data==2): next_global_state= 'queryGeneration_2'
-
         next_global_state = ''
         while next_global_state == '':
            pass 
@@ -335,39 +351,45 @@ class QueryGeneration(smach.State):
     
 class QueryGeneration_0(smach.State):
     def __init__(self):
-        smach.State.__init__(self,outcomes=['queryGenerateAnswers'], input_keys = ['selectedQuestions', 'story_prompt'],output_keys=['selectedQuestions'])
+        smach.State.__init__(self,outcomes=['queryGenerateAnswers'], input_keys = ['selectedQuestions', 'story_prompt', 'answers'],output_keys=['selectedQuestions', 'story_prompt', 'answers'])
     def execute(self,userdata):
         story_prompt = userdata.story_prompt
+        answers = userdata.answers
         print("Query Generation 0 is ACTIVE")
         local_data = server.await_response()
         print("LOCAL DATA RECIEVED FOR QUERY GENERATION 0 STATE: ", local_data)
         questionsExtracted= local_data
         selectedQuestions = userdata.selectedQuestions
-        selectedQuestions = questionsExtracted        
-        print(questionsExtracted)     
+        selectedQuestions = local_data 
+        answers = ai.gAbQaS(story_prompt,selectedQuestions)
+        print(answers)
+        print("Before transitioning to the answers")
+
         next_global_state= 'queryGenerateAnswers'        
         return next_global_state
 # QueryGenerateAnswers 
 # state to check after human creating handmade questions if it wants to see ai generated answers
+#TODO: Not working
 class QueryGenerateAnswers(smach.State):
     def __init__(self):
-        smach.State.__init__(self,outcomes= ['queryInteraction'], input_keys=['selectedQuestions','story_prompt'], output_keys=['story_prompt', 'selectedQuestions'])
+        smach.State.__init__(self,outcomes= ['queryInteraction'], input_keys=['selectedQuestions','story_prompt', 'answers'], output_keys=['story_prompt', 'selectedQuestions', 'answers'])
     def execute(self,userdata):
         print("Query Generation Answers State Active")
         selectedQuestions= userdata.selectedQuestions
+        print(selectedQuestions)
         story_prompt = userdata.story_prompt
         local_data = server.await_response()
+        print(selectedQuestions)
+        print("WILL PRINT THE LOCAL DATA")
         print(local_data)
-        if(local_data==0): 
-            #ai generate answers 
-            #append these answers to the questions aka re-initialize  the answers 
-            print("Hello")
+        print("PRINTED THE LOCAL DATA")
+        if(local_data=="Answers"):         
+            answers = ai.gAbQaS(story_prompt,selectedQuestions)
+            print(answers)
+            asyncio.run(send_data("Answers: " + answers))                            
         next_global_state = 'queryInteraction'
         return next_global_state
 
-        
-
-   
 class QueryGeneration_1(smach.State):
     def __init__(self):
         smach.State.__init__(self,outcomes=['queryGeneration_1_manager'], input_keys=['selectedQuestions','story_prompt'], output_keys=['story_prompt', 'selectedQuestions'])
@@ -573,6 +595,11 @@ class Goodbye(smach.State):
         return 'finishState'
     
 def main():
+
+  #  rospy.init_node('StorytellingMaster', anonymous=True)
+
+   # subAlphaSay = rospy.Publisher('/robotCommand', String, queue_size=10)
+    #mention it in states as inout and output keys in each state
 
     #create a smach state machine
     sm = smach.StateMachine(outcomes=['outcome4']) # i assume outcome4 is the final state

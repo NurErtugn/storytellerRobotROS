@@ -52,6 +52,65 @@ def complete_story(story_segment,model=MODEL, temperature=0.7, max_tokens=1000):
 
     return response.choices[0].message.content
 
+#generate story based on questions ==> used the method few shot prompting
+
+def gSbA(question_segment,word_count, model= MODEL, temperature = 0.7, max_tokens = 1000):
+    system_prompt = (f"""Given the following questions : 
+                     ```
+                     {question_segment}
+                     ```
+                     Generate a story under
+                     {word_count} words that would have answer to the question
+                     here is an example of what i'm looking for:
+                     Questions:What's the name of Nur's Robot ? How's the weather today? What was Robot doing when Nur woke up
+                     Generated Story: Today was a sunny day. Nur opened her eyes to her Robot Alpha-Mini singing a morning song for her.""")
+
+    response = client.chat.completions.create(
+        model=model,
+        messages= [
+            { "role": "system",
+             "content" : system_prompt },
+        ],       
+        n=3,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    ) 
+
+    return response.choices[0].message.content
+
+
+#def generate answers based on questions and the story
+def gAbQaS(story_segment,question_segment, model= MODEL, temperature = 0.7, max_tokens = 1000):
+    system_prompt = (f"""Given the following questions : 
+                     ```
+                     {question_segment}
+                     ```
+                     Generate answers that would have answer in the following story {story_segment} 
+                     Give explanation to your answers
+                     here is an example of what i'm looking for:
+                     Story: Today was a sunny day. Nur opened her eyes to her Robot Mini Nur singing a morning song for her.
+                     Questions:
+                     -What's the name of Nur's Robot ? 
+                     -How's the weather today? 
+                     -What was Robot doing when Nur woke up
+                     -Where did Nur and Tom meet?
+                     Generated Answers:
+                      - Answer 1: Nur's Robot's name is Mini Nur 
+                      - Answer 2: It's sunny day today
+                      - Answer 3: When Nur woke up, Robot was singing songs for Nur
+                      - Answer 4: Nur didnt meet Tom in the story  """)
+
+    response = client.chat.completions.create(
+        model=model,
+        messages= [
+            { "role": "system",
+             "content" : system_prompt },
+        ],       
+        n=3,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    ) 
+    return response.choices[0].message.content
 
 
 def complete_story_german(story_segment,model=MODEL, temperature=0.7, max_tokens=1000):

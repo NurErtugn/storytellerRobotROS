@@ -93,7 +93,7 @@
 			letter-spacing: 1px;
 			font-size: 20px;
 			background-color: rgb(255, 220, 78);
-			border: 5px solid rgb(248, 149,s 19);
+			border: 5px solid rgb(248, 149,19);
 			cursor: pointer; /*cursor to hand pointer*/			
 		}
 		#submit-button:hover{
@@ -110,10 +110,20 @@
 		<div id = "mainButtons-container">
 			<button id="main-button" onclick="showStory()">Start Storytime </button>
 			<button id = "main-button" onclick="showHistory(this)">Show History</button> 
+			<button id = "main-button" onclick="showDescription(this)">User Guide</button> 
+
 		</div>
 		<!--Area to show saved history-->
 		<div id="savedHistory"></div>	
-		
+		<div id="userGuide" style ="display:none;">
+			Welcome to Alpha-Mini Story Generation. We believe that storytelling has a huge power in teaching and children  <br>
+			developpement . Hence this model promotes two  main functions: generating stories for different age group and levels, <br>
+			and storyfying the teaching course content with the help of artificial intelligence while storyfying the content. <br>
+			While this tailor-made models does storytelling with the robot Alpha-Mini, it is also possible to ask questions to children <br>
+			about the stories, and to create complete dialogs with the students. On the other side, the control is still completely on the <br>
+			user! At any point in time, user can modify or give feedback to the model to change the path of this generative model!<br>
+			Let's explore this journey together!			
+		</div>
 	
 	<div id="language_selector" style = "display:none">
 		<label > &#x1F916; : What should be the language of your story ? </label><br>
@@ -137,13 +147,19 @@
 	<br>
 
 		<input type="radio" id="ai0" name="ai" value="0" onclick="hideSlider()">
-    	<label for="ai0">&#x1F5E3;: I'll write you the story and you will tell it out loud ! </label><br>
+    	<label for="ai0">&#x1F5E3;: I'll write down  the complete story </label><br>
+
     	<input type="radio" id="ai1" name="ai" value="1" onclick="showSlider()">
-    	<label for="ai1">&#x1F5E3;: I will give an explanation, and i want you to turn into a story .</label><br>  
+    	<label for="ai1">&#x1F5E3;: Give explanation about the story that you want Alpha-Mini to generate .</label><br>  
+
     	<input type="radio" id="ai2" name="ai" value="2" onclick="showSlider()">
-    	<label for="ai2">&#x1F5E3;: I will give you a topic, and you will shape the story .</label><br>
+    	<label for="ai2">&#x1F5E3;: Give a topic and let Alpha-Mini come up with a story .</label><br>
+
 		<input type="radio" id="ai3" name="ai" value="3" onclick="showSlider()">
-    	<label for="ai3">&#x1F5E3;: I will write a part of the story, and  you will complete it. </label><br><br>
+    	<label for="ai3">&#x1F5E3;: Write a part of the story, and make Alpha-Mini complete the rest of the story </label><br>
+		
+		<input type="radio" id="ai4" name="ai" value="4" onclick="showSlider()">
+    	<label for="ai4">&#x1F5E3;: Ask questions and make Alpha-Mini generate story based on the answers of these questions  </label><br>
 	
 	<br>
 		<!-- Story or prompt to be inputted-->
@@ -177,6 +193,12 @@
 		<button id="sendModifiedButton" style="display: none;">Send Modified Version</button>
 		<button id="keepStoryButton">Keep Story</button>
 		<button id = "regenerateButton">Regenate Story</button>		
+	</div>
+
+	<div class="container">
+		<label > &#x1F916; : If you want to change any detail in the story, let us know and submit! </label><br>	
+		<textarea id="suggestions" ></textarea>
+		<input type="button" id="submit-button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="submitSuggestions()"/>
 	</div>
 
 	<div id="question_selector" style = "display:block">
@@ -229,6 +251,13 @@ Question 3
 			<input type="button" id="submit-button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="sendToSeeAns()"/>
 	</div>
 
+	<div id = "query_human_answers" style = "display: none">
+		<label for="'story-form' "> &#x1F916; :Here's your Alpha-Mini generated answers : </label><br>
+		<br>
+
+			<textarea form="story-form" id="answers_hum_query " cols="40" rows="5"  ></textarea>
+	</div>
+
 	<div id = "query_ai" style="display:none">
 		<!--Questions about the story to be inputted by AI -->
 		<label for="'story-form' "> &#x1F916; : Generated Questions with answers and citations from the story:<br> 
@@ -271,8 +300,7 @@ Question 3
 			</div>
 
 		</form>
-	</div>
-	
+	</div>	
 
 	<p>&#x1F916;:Once the Alpha-Mini has finished telling the story, <br>
 -Press LEFT ARROW and then the Clear All button to tell a new story (go to Step 1), <br>
@@ -341,7 +369,6 @@ Question 3
 			socket.send("Regenerate ");
 			socket.close;
 		});	
-		
 	}
 
 	submitButton2.addEventListener('click', submitModifiedQuestions);
@@ -368,6 +395,21 @@ Question 3
 		});	
 		submitButton2.disabled = true;
 		
+	}
+
+	
+
+	// when the user wants to see ai generated answers to the questions
+	const sendToSeeAns = () => {
+		const socket = new WebSocket('ws://localhost:10000');
+		socket.addEventListener('open', function(event){
+			var answer = document.querySelector('input[name="submitHum"]:checked').value;
+			if(answer==0){ 
+				socket.send("Answers");
+				socket.close;
+				document.getElementById("query_human_answers").style.display= "block";
+			}
+		});
 	}
 
 	modifyButton2.addEventListener("click", function(){
@@ -490,12 +532,16 @@ Question 3
 			const queryAI = document.getElementById('questions_ai');
 			queryAI.value = message;
 			updateHeight(queryAI);
+		}else if(message.toLowerCase().trim().startsWith("answers:")){
+			const answered = document.getElementById('answers_hum_query');
+			answered.value = message;
+			updateHeight(answered);
+			document.getElementById('query_human_answers').style.display="block";
 		}else{
             // Assuming the message is the story or feedback to be displayed
 			const storyPromptMain =document.getElementById('storyPrompt');
         	storyPromptMain.value = message;
-			updateHeight(storyPromptMain);
-			
+			updateHeight(storyPromptMain);		
 
 		}
         };
@@ -545,6 +591,17 @@ Question 3
 				socket.close()		
 			});
 		}
+
+	// listen to suggestions to change the story 
+	const submitSuggestions= () => {
+		const socket =new WebSocket('ws://localhost:10000');
+        socket.addEventListener('open', function (event) {
+			message = document.getElementById("suggestions").value;
+			socket.send("suggestions :" + message);
+			socket.close();
+		});
+
+	}
 
 // Picking the levels of AI help 
 	const sendAnswerData = (some) => {
@@ -626,6 +683,18 @@ Question 3
 		document.getElementById("language_selector").style.display = "block";
 
 	}
+	// function to show project description for the users 
+	function showDescription(button){
+		const guide = document.getElementById('userGuide');
+		if(button.innerText==="User Guide"){
+			guide.style.display='block';
+			button.innerText= "Close";
+		}else if(button.innerText==="Close"){
+			guide.style.display='none';
+			button.innerText = "User Guide";
+		}
+
+	}
 
 	// function to see previously saved things
 	function showHistory(button){
@@ -634,7 +703,7 @@ Question 3
 		const entryThings = JSON.parse(localStorage.getItem('sessionEntry')) || [];
 		console.log("Entries retrieved:", entryThings);
 		// sort entries by timestamp in decreasing order 
-		entryThings.sort((current,next) => new Date(next.timestamp)- new Date(current.timestamp));
+		entryThings.sort((current,next) => new Date(current.timestamp)- new Date(next.timestamp));
 
 		const savedHistory = document.getElementById('savedHistory')
 
