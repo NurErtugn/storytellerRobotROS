@@ -29,14 +29,6 @@ async def handler(websocket, path, callback):
                     exit(0) #exit the program 
                 callback(data) #execute the callback function w received data
                 
-          #  else:
-           #     print(f"[server.py]: Received data from the state machine: {str(message)}") 
-          #      scriptpath = os.path.dirname(__file__)
-           #     filename = os.path.join(scriptpath,'index.html')    
-         #       with open(filename, 'r') as file:
-          #          html_content = file.read()
-         #       await websocket.send(html_content)
-             #   await websocket.send(message)
     finally: 
         clients.remove(websocket)
 
@@ -89,12 +81,9 @@ def await_response():
 def start_thread():
     global t
     t = Thread(target=run_server, args=(main_callback,)) # target = function to be executed by the thread, args = arguments to be passed to the target function
-    print("t started")
     t.start()
-    print("t good")
-#Join the thread
+   
 def join_thread():
-    print("joined")
     global t
     t.join()
 

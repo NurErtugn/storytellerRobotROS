@@ -35,16 +35,16 @@
 			width: 75%;
 			height: 100px;
 			margin-top: 10px; 
-			background-color: #ff8861;
+			background-color: #fff9c4;
 			overflow-y: hidden; 
 					
 		}
 
 		#storyPrompt {
-			background-color: rgba(124, 255, 107, 0.97);
+			background-color: #F2F2F2;
 		}
 		#editableText{
-			background-color:#95eff0;
+			background-color:#fff9c4;
 			display: none;
 		}
 
@@ -60,14 +60,16 @@
 			padding: 15px;
 			letter-spacing: 1px;
 			font-size: 20px;
-			background-color: rgb(255, 220, 78);
+			background-color: #7cbcff;
 			border: 5px solid rgb(248, 149,s 19);
 			cursor: pointer; /*cursor to hand pointer*/			
 		}
-		#submit-button:hover{
-			background-color: rgb(248, 149, 19);
+		button:hover{
+			background-color: #007bff;
 		}
-	
+		#submit-button:hover{
+			background-color: #ffb74d;
+		}	
 		
 		#mainButtons-container{
 			text-align: center;
@@ -99,7 +101,51 @@
 		#submit-button:hover{
 			background-color: rgb(248, 149, 19);
 		}
-	
+
+		.container2 {
+			max-width: 600px;
+			margin: 0 auto;
+			padding: 20px;
+			}
+
+		.button2 {
+			padding: 10px 20px;
+			border: none;
+			background-color: #6daeff;
+			color: #fcfcfc;
+			border-radius: 5px;
+			cursor: pointer;
+			margin-top: 10px;
+		}
+
+		.button2:hover {
+			background-color: #1d34aa;
+		}
+
+		.button-group2 {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.header2 {
+			font-size: 20px;
+			font-weight: bold;
+			margin-bottom: 20px;
+		}
+
+		.checkbox-label, .radio-label {
+			display:list-item;
+			margin-bottom: 10px;
+			padding: 5px;
+			background-color: #b6ebdf;
+			border-radius: 5px;
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+		}
+
+		.checkbox-label:hover, .radio-label:hover {
+			background-color: #12a1c4;
+		}
 		
 	</style>
 </head>
@@ -172,7 +218,32 @@
 			<p>&#x1F916;: Story length: <span id="length"></span> words</p>
 			<input type="range" min="50" max="600" value="400" class="slider" id="story_length"> 
 		</div>
-		
+	<br>
+
+		<div class="container2" id="ageSelector" style="display:none">
+			<div class="header2">Select Your Audience:</div>
+			<label class="radio-label">
+				<input type="radio" name="age" id="age1" value="Toddlers">
+				<label for="age1">👶1-3 years</label>
+			</label>
+			<label class="radio-label">
+				<input type="radio" id="age2" name="age" value="Preschoolers">
+				<label for ="age2">🧒 3-5 years</label>
+			</label>
+			<label class="radio-label">
+				<input type="radio" name="age" id="age3"value="Early Elementary">
+				<label for="age3">👦5-7 years</label>
+			</label>
+			<label class="radio-label">            
+				<input type="radio" name="age" id="age4" value="Late Elementary">
+				<label for="age4">👧7-9 years</label><br>
+			</label>
+			<label class="radio-label">
+				<input type="radio" name="age" id="age5" value="Preteens">
+				<label for="age5">🧑9-12 years</label>
+			</label>
+			
+		</div>
 
 	</form>
 	<br>
@@ -187,18 +258,22 @@
 		<textarea id="storyPrompt" readonly >Waiting for the story...</textarea>
 	</div>
 
+	
+
 	<div class="button-container">	
 		<button id="editButton">Edit </button>
 		<button id="goBackButton" style="display: none;">Go back</button>
 		<button id="sendModifiedButton" style="display: none;">Send Modified Version</button>
 		<button id="keepStoryButton">Keep Story</button>
-		<button id = "regenerateButton">Regenate Story</button>		
+		<button id = "regenerateButton">Regenate Story</button>	
+		<button id = "suggestionButton" onclick="suggestionBoxOnn()">Submit Suggestions & Regenate Story</button>	
+					
 	</div>
 
-	<div class="container">
-		<label > &#x1F916; : If you want to change any detail in the story, let us know and submit! </label><br>	
-		<textarea id="suggestions" ></textarea>
-		<input type="button" id="submit-button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="submitSuggestions()"/>
+	<div class="container" id="suggestionBox" style = "display: none;">
+			<label > &#x1F916; : If you want to change any detail in the story, let us know and submit! </label><br>	
+			<textarea id="suggestions" ></textarea><br>
+			<input type="button" id="submit-button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="submitSuggestions()"/><br>
 	</div>
 
 	<div id="question_selector" style = "display:block">
@@ -336,6 +411,7 @@ Question 3
 	}
 		
 	var regenerateButton= document.getElementById("regenerateButton");
+	var suggestionButton = document.getElementById("suggestionButton");
 	var keepButton = document.getElementById("keepStoryButton");
 	var editButton= document.getElementById("editButton");
 	var storyPrompt = document.getElementById("storyPrompt");
@@ -373,7 +449,7 @@ Question 3
 
 	submitButton2.addEventListener('click', submitModifiedQuestions);
 
-	submitToSeeAnswersButton.addEventListener('click', submitToSeeAnswersFunction);
+	//submitToSeeAnswersButton.addEventListener('click', submitToSeeAnswersFunction);
 
 	//TODO
 	function submitToSeeAnswersFunction(){
@@ -439,6 +515,7 @@ Question 3
 	//if i pressed on the keep story
 	keepButton.addEventListener("click",function(){
 		regenerateButton.disabled=true;
+		suggestionButton.disabled= true;
 		editButton.disabled = true;
 		const socket = new WebSocket('ws://localhost:10000');
 		socket.addEventListener('open', function(event){
@@ -495,6 +572,13 @@ Question 3
         });
     };	
 
+	// make the suggestion box appear
+	function suggestionBoxOnn(){
+		var suggestionBox = document.getElementById("suggestionBox");
+		suggestionBox.style.display= "block";
+
+	}
+
 	function saveStory(){
 		const socket = new WebSocket('ws://localhost:10000');
         socket.addEventListener('open', function (event) {
@@ -514,6 +598,7 @@ Question 3
 	}
 	function showSlider(){
 		document.getElementById("story_length_slider").style.display = "block";
+		document.getElementById("ageSelector").style.display="block";
 	}
 
 	function clearAll(some){
@@ -629,7 +714,13 @@ Question 3
             var ai = document.querySelector('input[name="ai"]:checked').value;
             var story = document.getElementById("story").value;
 			var length = document.getElementById("length").innerHTML;
-            var message = ai + "|" + story + "|"  + length; 
+			
+			var default_level = "Early Elementary"
+			var level1 = document.querySelector('input[name="age"]:checked').value			
+			var level = level1 ? level1 : default_level
+
+            var message = ai + "|" + story + "|"  + length + "|"+ level; 
+			// TODO: AI  level 0 message sending not working ?????????
             socket.send(message);	
             socket.close();
         });
@@ -642,7 +733,7 @@ Question 3
 			questions_box = document.getElementById("questions_to_ask");
 			questions_box.setAttribute('readonly', 'true');
 			var questionToAskData = questions_box.value;
-			submitToSeeAnswersButton.style.display="block";
+			//submitToSeeAnswersButton.style.display="block";
 			socket.send(questionToAskData);
 			socket.close()
 		});

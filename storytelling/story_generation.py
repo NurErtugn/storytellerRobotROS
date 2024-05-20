@@ -53,7 +53,6 @@ def complete_story(story_segment,model=MODEL, temperature=0.7, max_tokens=1000):
     return response.choices[0].message.content
 
 #generate story based on questions ==> used the method few shot prompting
-
 def gSbA(question_segment,word_count, model= MODEL, temperature = 0.7, max_tokens = 1000):
     system_prompt = (f"""Given the following questions : 
                      ```
@@ -64,6 +63,38 @@ def gSbA(question_segment,word_count, model= MODEL, temperature = 0.7, max_token
                      here is an example of what i'm looking for:
                      Questions:What's the name of Nur's Robot ? How's the weather today? What was Robot doing when Nur woke up
                      Generated Story: Today was a sunny day. Nur opened her eyes to her Robot Alpha-Mini singing a morning song for her.""")
+
+    response = client.chat.completions.create(
+        model=model,
+        messages= [
+            { "role": "system",
+             "content" : system_prompt },
+        ],       
+        n=3,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    ) 
+
+    return response.choices[0].message.content
+
+
+#modify generated story 
+
+def mGs(story_segment,indications, model= MODEL, temperature = 0.7, max_tokens = 1000):
+    system_prompt = (f"""The goal is to rewrite the story given, with a set of instructions.
+    Story: 
+    {story_segment}
+    Instructions:
+    {indications}
+    Here is an example of the task:
+    
+    Story:
+    Nur and Seb is a happy couple and they decided to buy a dog. Nur and Seb had happily ever after
+    Indication:
+    - Change the ending of the story. 
+    - Change the name of the main character. 
+    - Change the animal that Seb and Nur bought. 
+    Generated Story: Celia and Seb is a happy couple. At the end of the day; Seb and Celia decided to build an aquiarium for their fish.""")
 
     response = client.chat.completions.create(
         model=model,
@@ -112,6 +143,66 @@ def gAbQaS(story_segment,question_segment, model= MODEL, temperature = 0.7, max_
     ) 
     return response.choices[0].message.content
 
+
+#different story generation for different age groups 
+
+# source for the system prompt : https://www.usillustrations.com/blog/understanding-different-childrens-books-age-groups
+
+def dSgDaG(topic, age_group, word_count= 200 , model= MODEL, temperature = 0.7, max_tokens = 1000):
+
+    system_prompt = (f"""Given the following topic : 
+                     ```
+                     {topic}
+                     ```
+                     Generate a story 
+                     For the given age group:
+                     ```
+                     {age_group}
+                     ```
+                    under  {word_count} words
+
+                    here is an example of what i'm looking for:
+                 
+                    If the age group is "Toddlers",then here are story features:
+                    - Basic concepts (colors, shapes, animals, everyday objects)
+                    - Simple, repetitive text
+                  
+                    If the age group is "Preschoolers",then  here are story features:
+                    - Simple, relatable narratives
+                    - Stories that enhance vocabulary
+                    - Themes that encourage critical thinking and empathy
+                   
+                    If the age group is "Early Elementary",then here are story features:
+                    - Simple, relatable narratives
+                    - Familiar settings and relatable characters
+                    - Introduction to problem-solving and critical thinking
+                    - Promotes empathy and understanding of diverse perspectives
+                  
+                    If the age group is "Late Elementary",then here are story features:
+                    -Middle-grade books
+                    - More complex narratives
+                    - Themes of friendship, adventure, and personal growth
+                    - Exploration of emotions and relationships
+
+                    If the age group is "Preteens",then here are story features:
+                    - Detailed narratives with developed plots
+                    - Focus on character development and emotional depth
+                    - Themes of identity, self-discovery, and social issues
+                    - More mature content, appropriate for their age
+                
+                                    """)
+
+    response = client.chat.completions.create(
+        model=model,
+        messages= [
+            { "role": "system",
+             "content" : system_prompt },
+        ],       
+        n=3,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    ) 
+    return response.choices[0].message.content
 
 def complete_story_german(story_segment,model=MODEL, temperature=0.7, max_tokens=1000):
     system_prompt = ("Hier ist der Beginn einer kreativen, freundlichen, fantastischen Geschichte für Kinder. "

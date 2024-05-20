@@ -145,7 +145,7 @@ class Greetings(smach.State):
 #Storytelling state of the state machine. Here the user has time to fill out the story generation form and QT will recite the story
 class Storytelling(smach.State):
     def __init__(self): #constructor  method of the greetings class. initialises the state with the specified outcomes . will indicate possible transitions to other states
-        smach.State.__init__(self, outcomes=['nextGoodbye', 'clientFeedback'], output_keys=['story_prompt','sl', 'selectedQuestions', 'answers'])
+        smach.State.__init__(self, outcomes=['nextGoodbye', 'clientFeedback'], output_keys=['story_prompt','sl', 'selectedQuestions', 'answers', 'suggestions'])
         
     def execute(self, userdata): #defines the behaviour of the greetings state when its executed 
         global next_global_state
@@ -162,38 +162,49 @@ class Storytelling(smach.State):
         inputs = local_data.split("|")
 
         ai_level = int(inputs[0])
-        story_prompt = inputs[1]
+        story = inputs[1]
         sl = int(inputs[2]) #STORYLENGHT , CHANGE LATER THE VARIABLE NAME 
+        level = inputs[3]
+    
         selectedQuestions= " "
+        suggestions = " "
         answers = " "
 
-
-        level_1_prompt = "Make the following text into a story, understandable by a 5 year old, using characters and dialogue: "
-        level_2_prompt_a = "Write a story about "
-        level_2_prompt_b = ", understandable by a 5 year old, using characters and dialogue, taking it step by step"
-        level_3_prompt = "Complete the beginning of this story, understandable by a 5 year old"
         level_3_prompt_a = "Gardez l'histoire originale, et tissez la suite de l'histoire à partir d'ici:"
-        
-        level_3_prompt_b="Continuer l'histoire à partir de la fin"       
-        if(ai_level == 1):
-            story_prompt = ai.generate_response(ai.translate(level_1_prompt, language_to = language)+ story_prompt + ", under " + str(sl) + " words.")
+
+        if(ai_level==0):
+            story_prompt=story            
+        elif(ai_level == 1):
+            story_prompt = ai.dSgDaG(story, level, str(sl)) 
             if language== 'fr':
-                story_prompt = ai.translate(story_prompt, 'en' , 'fr')
+                story_prompt = ai.translate(story, 'en' , 'fr')
+            elif language=='de':
+                story_prompt= ai.translate(story, 'en', 'de')
+          
         elif(ai_level == 2):
-            story_prompt = ai.generate_response(ai.translate(level_2_prompt_a, language_to=language)+ story_prompt + ai.translate(level_2_prompt_b, language_to = language)+ ", under " + str(sl)+ " words.")
+            story_prompt = ai.dSgDaG(story, level, str(sl)) 
+            if language== 'fr':
+                story_prompt = ai.translate(story, 'en' , 'fr')
+            elif language=='de':
+                story_prompt= ai.translate(story, 'en', 'de')          
+
         elif(ai_level==3):
             if language== 'fr' : 
                 #story_prompt= str(inputs[1]) + ai.translate(ai.complete_story(level_3_prompt_a + story_prompt + level_3_prompt_b+ ", moins de " + str(story_length)+ " mots."), language_to=language)
-                story_prompt= ai.complete_story(ai.translate(level_3_prompt_a, language_to=language)  + story_prompt+  "under" + str(sl) + "words")
+                story_prompt= ai.complete_story(ai.translate(level_3_prompt_a, language_to=language)  + story+  "under" + str(sl) + "words")
             elif language!= 'en':
-                story_prompt== ai.complete_story(story_prompt + "Complete the rest in German" + "under" + str(sl) + "words")
+                story_prompt== ai.complete_story(story + "Complete the rest in German" + "under" + str(sl) + "words")
             else:
-                story_prompt= ai.complete_story(story_prompt + "Complete the rest of the story in English" + "under" + str(sl) + "words")
-                #TODO: doesnt really output the beginning of what user writes down 
+                story_prompt=  ai.complete_story(story + "Complete the rest of the story in English " + "under" + str(sl) + "words")
+               
         elif(ai_level==4):
-            story_prompt= ai.gSbA(story_prompt, str(sl))
-            #TODO: different language translations
-        
+            if language == 'fr':
+                story_prompt= ai.translate(ai.gSbA(story, str(sl)),'en', 'fr')
+            elif(language!='en'):
+                story_prompt= ai.gSbA(story+ "In German", str(sl))
+            else:
+                story_prompt= ai.gSbA(story, str(sl))
+            
             
         #sentences_with_sentiment = classifier.classify(story_prompt, AUTO_SPLIT)
         print("INPUT_1")
@@ -203,6 +214,7 @@ class Storytelling(smach.State):
         userdata.story_prompt = story_prompt
         userdata.selectedQuestions = selectedQuestions
         userdata.answers = answers
+        userdata.suggestions = suggestions
 
         userdata.sl = sl
     
@@ -215,8 +227,8 @@ class Storytelling(smach.State):
 
 class ClientFeedback(smach.State):
     def __init__(self): 
-        smach.State.__init__(self,outcomes= ['keepStory', 'modifyStory','regenerateStory'],
-                              input_keys=['sl','story_prompt', 'selectedQuestions', 'answers'],output_keys=['story_prompt', 'sl', 'selectedQuestions', 'answers'])  
+        smach.State.__init__(self,outcomes= ['keepStory', 'modifyStory','regenerateStory', 'suggestedStory'],
+                              input_keys=['sl','story_prompt', 'selectedQuestions', 'answers', 'suggestions'],output_keys=['story_prompt', 'sl', 'selectedQuestions', 'answers', 'suggestions'])  
 
     def execute(self,userdata):
         global next_global_state
@@ -251,6 +263,11 @@ class ClientFeedback(smach.State):
         
         elif(local_data.split(' ', 1)[0]== 'suggestions'):
             suggestions = local_data.split(' ',1)[1]
+            userdata.suggestions = suggestions
+            userdata.story_prompt = story_prompt
+            userdata.sl= sl
+            next_global_state = 'suggestedStory'
+            return next_global_state
             #TODO
             # ai generate based on suggestions call.
             #send it back to client feedback 
@@ -369,24 +386,24 @@ class QueryGeneration_0(smach.State):
         return next_global_state
 # QueryGenerateAnswers 
 # state to check after human creating handmade questions if it wants to see ai generated answers
-#TODO: Not working
+# note: not implemented 
 class QueryGenerateAnswers(smach.State):
     def __init__(self):
         smach.State.__init__(self,outcomes= ['queryInteraction'], input_keys=['selectedQuestions','story_prompt', 'answers'], output_keys=['story_prompt', 'selectedQuestions', 'answers'])
     def execute(self,userdata):
-        print("Query Generation Answers State Active")
+       # print("Query Generation Answers State Active")
         selectedQuestions= userdata.selectedQuestions
         print(selectedQuestions)
         story_prompt = userdata.story_prompt
-        local_data = server.await_response()
-        print(selectedQuestions)
-        print("WILL PRINT THE LOCAL DATA")
-        print(local_data)
-        print("PRINTED THE LOCAL DATA")
-        if(local_data=="Answers"):         
-            answers = ai.gAbQaS(story_prompt,selectedQuestions)
-            print(answers)
-            asyncio.run(send_data("Answers: " + answers))                            
+    #    local_data = server.await_response()
+    #    print(selectedQuestions)
+    #    print("WILL PRINT THE LOCAL DATA")
+    #    print(local_data)
+     #   print("PRINTED THE LOCAL DATA")
+     #   if(local_data=="Answers"):         
+     #       answers = ai.gAbQaS(story_prompt,selectedQuestions)
+     #       print(answers)
+    #        asyncio.run(send_data("Answers: " + answers))                            
         next_global_state = 'queryInteraction'
         return next_global_state
 
@@ -488,7 +505,23 @@ class QueryInteraction(smach.State):
         next_global_state= 'nextGoodbye'
         return next_global_state
    
+class SuggestedStory(smach.State):
+    def __init__(self):
+        smach.State.__init__(self,outcomes=['clientFeedback'],input_keys=['story_prompt', 'sl', 'suggestions'], 
+                             output_keys=['story_prompt'])
+    
+    def execute(self,userdata):
+        print("I have a story to modify based on the suggestion")
+        sl= userdata.sl
+        story_prompt = userdata.story_prompt
+        suggestions = userdata.suggestions
+        story_prompt = ai.mGs(story_prompt, suggestions)
 
+        userdata.story_prompt = story_prompt
+        
+        next_global_state= 'clientFeedback'
+        return next_global_state
+    
 class RegenerateStory(smach.State):
     def __init__(self):
         smach.State.__init__(self,outcomes=['clientFeedback'],input_keys=['story_prompt', 'sl'], 
@@ -619,7 +652,8 @@ def main():
         smach.StateMachine.add('CLIENTFEEDBACK',ClientFeedback(), transitions= {
             'keepStory': 'KEEPSTORY',
             'modifyStory': 'KEEPSTORY',
-            'regenerateStory': 'REGENERATESTORY'
+            'regenerateStory': 'REGENERATESTORY',
+            'suggestedStory' : 'SUGGESTEDSTORY'
         })
 
         smach.StateMachine.add('KEEPSTORY', KeepStory(), transitions={
@@ -630,7 +664,10 @@ def main():
         })
         smach.StateMachine.add('REGENERATESTORY', RegenerateStory(),transitions={
             'clientFeedback':'CLIENTFEEDBACK'
-           # 'modifyStory':'KEEPSTORY'
+    
+        })
+        smach.StateMachine.add('SUGGESTEDSTORY', SuggestedStory(),transitions={
+            'clientFeedback':'CLIENTFEEDBACK'
         })
 
         smach.StateMachine.add('QUERYGENERATION', QueryGeneration(), transitions={
