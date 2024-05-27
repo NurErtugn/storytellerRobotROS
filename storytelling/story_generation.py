@@ -53,29 +53,29 @@ def complete_story(story_segment,model=MODEL, temperature=0.7, max_tokens=1000):
     return response.choices[0].message.content
 
 #generate story based on questions ==> used the method few shot prompting
-def gSbA(question_segment,word_count, model= MODEL, temperature = 0.7, max_tokens = 1000):
-    system_prompt = (f"""Given the following questions : 
-                     ```
-                     {question_segment}
-                     ```
-                     Generate a story under
-                     {word_count} words that would have answer to the question
-                     here is an example of what i'm looking for:
-                     Questions:What's the name of Nur's Robot ? How's the weather today? What was Robot doing when Nur woke up
-                     Generated Story: Today was a sunny day. Nur opened her eyes to her Robot Alpha-Mini singing a morning song for her.""")
+#def gSbA(question_segment,word_count, model= MODEL, temperature = 0.7, max_tokens = 1000):
+   # system_prompt = (f"""Given the following questions : 
+   #                  ```
+    #                 {question_segment}
+    #                 ```
+    #                 Generate a story under
+    #                 {word_count} words that would have answer to the question
+    #                 here is an example of what i'm looking for:
+   #                  Questions:What's the name of Nur's Robot ? How's the weather today? What was Robot doing when Nur woke up
+   #                  Generated Story: Today was a sunny day. Nur opened her eyes to her Robot Alpha-Mini singing a morning song for her.""")
 
-    response = client.chat.completions.create(
-        model=model,
-        messages= [
-            { "role": "system",
-             "content" : system_prompt },
-        ],       
-        n=3,
-        temperature=temperature,
-        max_tokens=max_tokens,
-    ) 
+   # response = client.chat.completions.create(
+    #    model=model,
+   #     messages= [
+   #         { "role": "system",
+   #          "content" : system_prompt },
+  #      ],       
+  #      n=3,
+  #      temperature=temperature,
+  #      max_tokens=max_tokens,
+ #   ) 
 
-    return response.choices[0].message.content
+  #  return response.choices[0].message.content
 
 
 #modify generated story 
@@ -221,6 +221,76 @@ def complete_story_german(story_segment,model=MODEL, temperature=0.7, max_tokens
         max_tokens=max_tokens,
     )
     return story_segment + response.choices[0].message.content
+
+def chooseTarget(ageGroup):
+
+    if ageGroup=="Toddlers":
+        prompt ="""- Basic concepts (colors, shapes, animals, everyday objects)
+                - Simple, repetitive text"""
+        
+    elif ageGroup== "Preschoolers":
+        prompt="""  - Simple, relatable narratives
+                    - Stories that enhance vocabulary
+                    - Themes that encourage critical thinking and empathy"""
+        
+    elif ageGroup== "Early Elementary":
+        prompt = """ - Simple, relatable narratives
+                    - Familiar settings and relatable characters
+                    - Introduction to problem-solving and critical thinking
+                    - Promotes empathy and understanding of diverse perspectives"""
+
+
+    elif ageGroup== "Late Elementary":
+        prompt= """-Middle-grade books
+                    - More complex narratives
+                    - Themes of friendship, adventure, and personal growth
+                    - Exploration of emotions and relationships """
+
+    elif ageGroup== "Preteens":
+        prompt= """- Detailed narratives with developed plots
+                    - Focus on character development and emotional depth
+                    - Themes of identity, self-discovery, and social issues
+                    - More mature content, appropriate for their age"""
+
+    else:
+        raise ValueError("choose target error")
+
+    return prompt
+
+
+
+#generate story based on questions ==> used the method few shot prompting
+
+def gSbA(question_segment, age_group, word_count=300, model= MODEL, temperature = 0.7, max_tokens = 1000):
+    system_prompt = (f"""Given the following questions : 
+                     ```
+                     {question_segment}
+                     ```
+                     Generate a story that would have answer to the questions
+                     here is an example of what i'm looking for:
+                     Questions:What's the name of Nur's Robot ? How's the weather today? What was Robot doing when Nur woke up
+                     Generated Story: Today was a sunny day. Nur opened her eyes to her Robot Alpha-Mini singing a morning song for her.                    
+                     For the given age group:
+                     ```
+                     {age_group}
+                     ```
+                     under  {word_count} words
+                    here is an example of what i'm looking for:
+                    {chooseTarget(age_group)}                          
+                                    """)
+
+    response = client.chat.completions.create(
+        model=model,
+        messages= [
+            { "role": "system",
+             "content" : system_prompt },
+        ],       
+        n=3,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    ) 
+
+    return response.choices[0].message.content
 
 def regenerateStory(storyPrompt,model=MODEL, temperature=0.8,max_tokens= 1000):
     system_prompt = "You are extremely warm and imaginative assistant, responsible with rewriting tales"

@@ -191,9 +191,8 @@
 		<!--Radio buttons for level of ai of the story-->
 	<label >&#x1F916;: First Things First... How much should i help you with your story :</label><br>
 	<br>
-
 		<input type="radio" id="ai0" name="ai" value="0" onclick="hideSlider()">
-    	<label for="ai0">&#x1F5E3;: I'll write down  the complete story </label><br>
+    	<label for="ai0">&#x1F5E3;: No help, I will provide the completed story </label><br>
 
     	<input type="radio" id="ai1" name="ai" value="1" onclick="showSlider()">
     	<label for="ai1">&#x1F5E3;: Give explanation about the story that you want Alpha-Mini to generate .</label><br>  
@@ -400,7 +399,6 @@ Question 3
 	function updateHeight(textValue){
 		textValue.style.height = 'auto'; // reset height to shrink grow as needed
 		textValue.style.height = textValue.scrollHeight + 'px'; // set height to to the text value height
-
 	}
 
 	var slider = document.getElementById("story_length");
@@ -470,10 +468,7 @@ Question 3
 			socket.close;
 		});	
 		submitButton2.disabled = true;
-		
-	}
-
-	
+	}	
 
 	// when the user wants to see ai generated answers to the questions
 	const sendToSeeAns = () => {
@@ -547,8 +542,6 @@ Question 3
 			this.textContent= "Edit";
 		}
 	});
-
-	
 
 	goBackButton.addEventListener('click', function(){
 		storyPrompt.value= editableTextArea.value;
@@ -637,7 +630,6 @@ Question 3
 
     ws.onclose = function(event) {console.log("Connection closed"); };
 
-	
 	const sendLanguageData = (some) => {
         const socket = new WebSocket('ws://localhost:10000');
         socket.addEventListener('open', function (event) {

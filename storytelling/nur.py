@@ -164,7 +164,7 @@ class Storytelling(smach.State):
         ai_level = int(inputs[0])
         story = inputs[1]
         sl = int(inputs[2]) #STORYLENGHT , CHANGE LATER THE VARIABLE NAME 
-        level = inputs[3]
+        level = inputs[3] #age group 
     
         selectedQuestions= " "
         suggestions = " "
@@ -175,14 +175,14 @@ class Storytelling(smach.State):
         if(ai_level==0):
             story_prompt=story            
         elif(ai_level == 1):
-            story_prompt = ai.dSgDaG(story, level, str(sl)) 
+            story_prompt = ai.dSgDaG(story, level, str(sl))  #dSgDaG(topic, age_group, word_count= 200 , model= MODEL, temperature = 0.7, max_tokens = 1000):
             if language== 'fr':
                 story_prompt = ai.translate(story, 'en' , 'fr')
             elif language=='de':
                 story_prompt= ai.translate(story, 'en', 'de')
           
         elif(ai_level == 2):
-            story_prompt = ai.dSgDaG(story, level, str(sl)) 
+            story_prompt = ai.dSgDaG(story, level, str(sl), temperature=0.8) 
             if language== 'fr':
                 story_prompt = ai.translate(story, 'en' , 'fr')
             elif language=='de':
@@ -199,11 +199,11 @@ class Storytelling(smach.State):
                
         elif(ai_level==4):
             if language == 'fr':
-                story_prompt= ai.translate(ai.gSbA(story, str(sl)),'en', 'fr')
+                story_prompt= ai.translate(ai.gSbA(story,level, str(sl)),'en', 'fr')
             elif(language!='en'):
-                story_prompt= ai.gSbA(story+ "In German", str(sl))
+                story_prompt= ai.gSbA(story+ "In German", level,str(sl))
             else:
-                story_prompt= ai.gSbA(story, str(sl))
+                story_prompt= ai.gSbA(story,level, str(sl))
             
             
         #sentences_with_sentiment = classifier.classify(story_prompt, AUTO_SPLIT)
