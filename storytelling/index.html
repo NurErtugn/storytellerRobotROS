@@ -314,9 +314,9 @@ Question 3
 		</div>	
 	
 	</div>
-
+	
 	<div id = "submitToSeeAnswers" style="display: none;">
-		<label for= "'story-form' "> Do you also wanna see possible answers to your questions?</label><br>
+		<label for= "'story-form' "> NOT IMPLEMENTED Do you also wanna see possible answers to your questions?</label><br>
 		<br>
 		<input type="radio" id="submit_ans0" name="submitHum" value="0" >
 		<label for="ai_0">&#x1F5E3;: Yes </label><br>
@@ -376,19 +376,15 @@ Question 3
 		</form>
 	</div>	
 
-	<p>&#x1F916;:Once the Alpha-Mini has finished telling the story, <br>
--Press LEFT ARROW and then the Clear All button to tell a new story (go to Step 1), <br>
--RIGHT ARROW to go to the questions,<br>
--ESC and then the Exit button to finish.</p>
-    <p>&#x1F916;:To go through the questions, press DOWN ARROW, until QT says there are no more questions.</p>
-	<p>&#x1F916;: Once the questions are finished, <br>
--Press LEFT ARROW and then the Clear All button to tell a new story (go to Step 1),	<br>
--ESC and then the Exit button to finish.
-	</p>
-	<p></p>
+	<div id = "sessionDiv" style = "display: none"> 
+		<label> &#x1F916; : Here's your session summary! </label><br>
+		<br>
+		<textarea id="sessionSummary" readonly ></textarea>
+	</div>
+
 	<button onclick="stopServer()">Exit</button>
 	<!--Button to registered web client input-->
-	<button onclick="saveTextBoxes()">Save History</button>	
+	<button onclick="saveTextBoxes()">Save Session</button>	
 	
 	
 	</div>
@@ -499,6 +495,16 @@ Question 3
 		const socket = new WebSocket('ws://localhost:10000');
 		socket.addEventListener('open', function(event){
 			socket.send("keepQuestions");
+
+			document.getElementById("sessionDiv").style.display= "block";
+			const date= "Date:" + new Date().toISOString();
+			const storyValue = "Topic of choice: " + document.getElementById('story').value; 
+			const storyPrompt ="Generated Story:" + document.getElementById('storyPrompt').value;
+			const AIQ = "AI Generated Questions:" + "\n" + document.getElementById('questions_ai').value; 
+			const session_information= date + "\n" + storyValue + "\n" + storyPrompt + "\n" + AIQ
+			const areaUpdate =document.getElementById("sessionSummary")
+			areaUpdate.value = session_information
+					updateHeight(areaUpdate)
 			socket.close();
 		});	
 		this.disabled=true;	
@@ -650,6 +656,16 @@ Question 3
 				selectedOptions.push(checkbox.value);
 			});
 			socket.send("Selected "+ selectedOptions);	
+			document.getElementById("sessionDiv").style.display= "block";
+			const date= "Date:" + new Date().toISOString();
+			const storyValue = "Topic of choice: " + document.getElementById('story').value; 
+			const storyPrompt ="Generated Story:" + document.getElementById('storyPrompt').value;
+			const AIQ = "AI Generated Questions:" + "\n" + document.getElementById('questions_ai').value; 
+			const AIQ_selected = "You selected to keep following questions : " + selectedOptions
+			const session_information= date + "\n" + storyValue + "\n" + storyPrompt + "\n" + AIQ + "\n" + AIQ_selected
+			const areaUpdate =document.getElementById("sessionSummary");
+			areaUpdate.value = session_information;
+			updateHeight(areaUpdate);
 
 		});
 	}
@@ -664,6 +680,19 @@ Question 3
 				if(question== '0'){
 					// make the survey thing pop up 
 					document.getElementById("answer_input").style.display = "block";
+				}
+				if(question=='1'){
+					// output whats done so far somewhere under
+					document.getElementById("sessionDiv").style.display= "block";
+					const date= "Date:" + new Date().toISOString();
+					const storyValue = "Topic of choice: " + document.getElementById('story').value; 
+					const storyPrompt ="Generated Story:" + document.getElementById('storyPrompt').value;
+					const session_information= date + "\n" + storyValue + "\n" + storyPrompt
+					const areaUpdate =document.getElementById("sessionSummary")
+					areaUpdate.value = session_information
+					updateHeight(areaUpdate)
+
+
 				}
 				socket.close()		
 			});
@@ -717,7 +746,6 @@ Question 3
             socket.close();
         });
     }
-
 	const sendQuestionToAskData = () => {
 		const socket =new WebSocket('ws://localhost:10000');
         socket.addEventListener('open', function (event) {
@@ -727,6 +755,16 @@ Question 3
 			var questionToAskData = questions_box.value;
 			//submitToSeeAnswersButton.style.display="block";
 			socket.send(questionToAskData);
+
+			document.getElementById("sessionDiv").style.display= "block";
+			const date= "Date:" + new Date().toISOString();
+			const storyValue = "Topic of Choice: " + document.getElementById('story').value; 
+			const storyPrompt ="Generated Story:" + document.getElementById('storyPrompt').value;
+			const humanQ= "User-Prepared Questions:" + "\n" +questionToAskData
+			const session_information= date + "\n" + storyValue + "\n" + storyPrompt + "\n" + humanQ
+			const areaUpdate =document.getElementById("sessionSummary")
+			areaUpdate.value = session_information
+			updateHeight(areaUpdate)
 			socket.close()
 		});
 	} 

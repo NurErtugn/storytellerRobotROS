@@ -89,12 +89,12 @@ def mGs(story_segment,indications, model= MODEL, temperature = 0.7, max_tokens =
     Here is an example of the task:
     
     Story:
-    Nur and Seb is a happy couple and they decided to buy a dog. Nur and Seb had happily ever after
+    Nur decided to get a dog. She settled on a playful Golden Retriever. She calls her Nurki.
     Indication:
     - Change the ending of the story. 
-    - Change the name of the main character. 
-    - Change the animal that Seb and Nur bought. 
-    Generated Story: Celia and Seb is a happy couple. At the end of the day; Seb and Celia decided to build an aquiarium for their fish.""")
+    - Change the name of her dog. 
+    - Change the animal that Nur got to a robot. 
+    Generated Story: Nur decided to get a robot. She settled on a helpful RoboAssistant. She calls it  RoboNurki.""")
 
     response = client.chat.completions.create(
         model=model,
@@ -148,7 +148,7 @@ def gAbQaS(story_segment,question_segment, model= MODEL, temperature = 0.7, max_
 
 # source for the system prompt : https://www.usillustrations.com/blog/understanding-different-childrens-books-age-groups
 
-def dSgDaG(topic, age_group, word_count= 200 , model= MODEL, temperature = 0.7, max_tokens = 1000):
+def dSgDaG(topic, age_group, word_count= 200 , model= MODEL, temperature = 0.8, max_tokens = 1000):
 
     system_prompt = (f"""Given the following topic : 
                      ```

@@ -1,6 +1,3 @@
-#check1: story generate > edit > send >works
-#check2: story generate > edit > regenerate > send >works
-#check3: story generate > regenerate >works 
 import asyncio
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false" #MODIFIED FOR THE PURPOSE TO GET RID OF HUGGING FACE DEADLICK ERROR
@@ -23,9 +20,6 @@ import rospy
 from std_msgs.msg import String
 
 
-#https://www.geeksforgeeks.org/how-to-convert-python-dictionary-to-json/ + start pahr : check drafts and start 
-#QT 
-#NO ROBOT SUPPORT: Mock_Robot()
 robot =Mock_Robot() # Robot() #Robot()
 #SPEECH_NEUTRAL = True ==> robot delivers a neutral tone speech
 
@@ -117,16 +111,18 @@ def qt_says(message, to_say = True, speech=robot.say_serv_lips):
         print(message,"\n") 
 
 #This is the first state of the state machine. It begins the interaction with the robot. 
-class Greetings(smach.State):
+class Greetings( smach.State):
 #defines the behavior for the greetings state of the state machine
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self, outcomes=['nextContent'])
+        self.subAlphaSay= subAlphaSay
+        
 
     def execute(self, userdata):
         global next_global_state
         global state_index
         global language
-
+    
         robot.playGesture('QT/hi')
         greetings = "Hi! My name is Q T and we are going to learn new things today, are you ready to go on an adventure?"
         
@@ -144,9 +140,9 @@ class Greetings(smach.State):
 
 #Storytelling state of the state machine. Here the user has time to fill out the story generation form and QT will recite the story
 class Storytelling(smach.State):
-    def __init__(self): #constructor  method of the greetings class. initialises the state with the specified outcomes . will indicate possible transitions to other states
+    def __init__(self,subAlphaSay): #constructor  method of the greetings class. initialises the state with the specified outcomes . will indicate possible transitions to other states
         smach.State.__init__(self, outcomes=['nextGoodbye', 'clientFeedback'], output_keys=['story_prompt','sl', 'selectedQuestions', 'answers', 'suggestions'])
-        
+        self.subAlphaSay= subAlphaSay
     def execute(self, userdata): #defines the behaviour of the greetings state when its executed 
         global next_global_state
         global local_data
@@ -175,14 +171,14 @@ class Storytelling(smach.State):
         if(ai_level==0):
             story_prompt=story            
         elif(ai_level == 1):
-            story_prompt = ai.dSgDaG(story, level, str(sl))  #dSgDaG(topic, age_group, word_count= 200 , model= MODEL, temperature = 0.7, max_tokens = 1000):
+            story_prompt = ai.dSgDaG(story, level, str(sl)) 
             if language== 'fr':
                 story_prompt = ai.translate(story, 'en' , 'fr')
             elif language=='de':
                 story_prompt= ai.translate(story, 'en', 'de')
           
         elif(ai_level == 2):
-            story_prompt = ai.dSgDaG(story, level, str(sl), temperature=0.8) 
+            story_prompt = ai.dSgDaG(story, level, str(sl), temperature=1.2) 
             if language== 'fr':
                 story_prompt = ai.translate(story, 'en' , 'fr')
             elif language=='de':
@@ -215,6 +211,7 @@ class Storytelling(smach.State):
         userdata.selectedQuestions = selectedQuestions
         userdata.answers = answers
         userdata.suggestions = suggestions
+        
 
         userdata.sl = sl
     
@@ -226,9 +223,10 @@ class Storytelling(smach.State):
         return next_global_state
 
 class ClientFeedback(smach.State):
-    def __init__(self): 
+    def __init__(self,subAlphaSay): 
         smach.State.__init__(self,outcomes= ['keepStory', 'modifyStory','regenerateStory', 'suggestedStory'],
                               input_keys=['sl','story_prompt', 'selectedQuestions', 'answers', 'suggestions'],output_keys=['story_prompt', 'sl', 'selectedQuestions', 'answers', 'suggestions'])  
+        self.subAlphaSay= subAlphaSay
 
     def execute(self,userdata):
         global next_global_state
@@ -287,9 +285,10 @@ class ClientFeedback(smach.State):
             return next_global_state
             
 class KeepStory(smach.State): #robot tells the story out loud 
-    def __init__(self): 
+    def __init__(self,subAlphaSay): 
         smach.State.__init__(self,outcomes=['repeatStory','nextEvaluation','nextGoodbye', 'queryGeneration'],input_keys=['story_prompt', 'selectedQuestions', 'answers'], output_keys=['story_prompt', 'selectedQuestions', 'answers'])
-        
+        self.subAlphaSay= subAlphaSay
+
     def execute(self,userdata):
         print("story kept. Proceeding")
         story_prompt=userdata.story_prompt 
@@ -316,7 +315,7 @@ class KeepStory(smach.State): #robot tells the story out loud
                    # qt_says(sentence, speech=robot.say_serv) #speak without lip sync as showing emotion 
                     #rospy.sleep(0.2)
         
-   #     self.subAlphaSay.publish(story_prompt)
+        self.subAlphaSay.publish(story_prompt)
 
         local_data = server.await_response()
         print("LOCAL DATA RECIEVED  FOR KEEP STORY STATE : ", local_data)
@@ -340,9 +339,9 @@ class KeepStory(smach.State): #robot tells the story out loud
         return next_global_state
     
 class QueryGeneration(smach.State):
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self,outcomes=['queryGeneration_0', 'queryGeneration_1'],input_keys=['story_prompt','selectedQuestions', 'answers'], output_keys=['story_prompt', 'selectedQuestions', 'answers'])
-    
+        self.subAlphaSay= subAlphaSay
     def execute(self,userdata):
         print("Query generation is selected ")
         story_prompt=userdata.story_prompt 
@@ -367,8 +366,9 @@ class QueryGeneration(smach.State):
     
     
 class QueryGeneration_0(smach.State):
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self,outcomes=['queryGenerateAnswers'], input_keys = ['selectedQuestions', 'story_prompt', 'answers'],output_keys=['selectedQuestions', 'story_prompt', 'answers'])
+        self.subAlphaSay= subAlphaSay
     def execute(self,userdata):
         story_prompt = userdata.story_prompt
         answers = userdata.answers
@@ -388,8 +388,10 @@ class QueryGeneration_0(smach.State):
 # state to check after human creating handmade questions if it wants to see ai generated answers
 # note: not implemented 
 class QueryGenerateAnswers(smach.State):
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self,outcomes= ['queryInteraction'], input_keys=['selectedQuestions','story_prompt', 'answers'], output_keys=['story_prompt', 'selectedQuestions', 'answers'])
+        self.subAlphaSay= subAlphaSay
+
     def execute(self,userdata):
        # print("Query Generation Answers State Active")
         selectedQuestions= userdata.selectedQuestions
@@ -408,8 +410,10 @@ class QueryGenerateAnswers(smach.State):
         return next_global_state
 
 class QueryGeneration_1(smach.State):
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self,outcomes=['queryGeneration_1_manager'], input_keys=['selectedQuestions','story_prompt'], output_keys=['story_prompt', 'selectedQuestions'])
+        self.subAlphaSay= subAlphaSay
+
     def execute(self,userdata):
         print("Query Generation Option 1 is ACTIVE")
         story_prompt = userdata.story_prompt
@@ -428,8 +432,10 @@ class QueryGeneration_1(smach.State):
     
 
 class QueryGeneration_1_Manager(smach.State):
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self,outcomes=['queryInteraction','queryGeneration_1'], input_keys=['selectedQuestions'], output_keys=['selectedQuestions'])
+        self.subAlphaSay= subAlphaSay
+
     def execute(self,userdata):
         print("Query Generation 1 Manager is ACTIVE")
         #question + answer + citation
@@ -481,9 +487,9 @@ def extract_questions(honey, mint):
     return '\n'.join(selected_questions)
 
 class QueryInteraction(smach.State):
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self,outcomes=['nextEvaluation', 'nextGoodbye'], input_keys=['selectedQUestions'])
-    
+        self.subAlphaSay= subAlphaSay
     def execute(self,userdata):
       
        # local_data = server.await_response()
@@ -506,10 +512,10 @@ class QueryInteraction(smach.State):
         return next_global_state
    
 class SuggestedStory(smach.State):
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self,outcomes=['clientFeedback'],input_keys=['story_prompt', 'sl', 'suggestions'], 
                              output_keys=['story_prompt'])
-    
+        self.subAlphaSay= subAlphaSay
     def execute(self,userdata):
         print("I have a story to modify based on the suggestion")
         sl= userdata.sl
@@ -523,10 +529,10 @@ class SuggestedStory(smach.State):
         return next_global_state
     
 class RegenerateStory(smach.State):
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self,outcomes=['clientFeedback'],input_keys=['story_prompt', 'sl'], 
                              output_keys=['story_prompt'])
-    
+        self.subAlphaSay= subAlphaSay   
     def execute(self,userdata):
         print("I have a story to regenerate")
         sl= userdata.sl
@@ -565,9 +571,9 @@ def next_q(key):
 q_ls = Listener(on_press = next_q)  
 #Define state Evaluation
 class Evaluation(smach.State):
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self, outcomes=['nextStory', 'nextGoodbye'])
-
+        self.subAlphaSay= subAlphaSay
     def execute(self, userdata):
         global next_global_state
         global questions
@@ -617,8 +623,9 @@ class Evaluation(smach.State):
 
 #define state Goodbye
 class Goodbye(smach.State):
-    def __init__(self):
+    def __init__(self,subAlphaSay):
         smach.State.__init__(self, outcomes=['finishState'])
+        self.subAlphaSay= subAlphaSay
 
     def execute(self, userdata):
         robot.showEmotion(sentiment.JOYFUL)
@@ -629,9 +636,9 @@ class Goodbye(smach.State):
     
 def main():
 
-  #  rospy.init_node('StorytellingMaster', anonymous=True)
+    rospy.init_node('StorytellingMaster', anonymous=True)
 
-   # subAlphaSay = rospy.Publisher('/robotCommand', String, queue_size=10)
+    subAlphaSay = rospy.Publisher('/robotCommand', String, queue_size=10)
     #mention it in states as inout and output keys in each state
 
     #create a smach state machine
@@ -640,69 +647,69 @@ def main():
     #open the container
     with sm:
         #Add states to the container
-        smach.StateMachine.add('GREETINGS', Greetings(), transitions={
+        smach.StateMachine.add('GREETINGS', Greetings(subAlphaSay), transitions={
             'nextContent':'STORYTELLING'
         })
 
-        smach.StateMachine.add('STORYTELLING', Storytelling(), transitions={
+        smach.StateMachine.add('STORYTELLING', Storytelling(subAlphaSay), transitions={
             'clientFeedback': 'CLIENTFEEDBACK',
             'nextGoodbye': 'GOODBYE'
         })
 
-        smach.StateMachine.add('CLIENTFEEDBACK',ClientFeedback(), transitions= {
+        smach.StateMachine.add('CLIENTFEEDBACK',ClientFeedback(subAlphaSay), transitions= {
             'keepStory': 'KEEPSTORY',
             'modifyStory': 'KEEPSTORY',
             'regenerateStory': 'REGENERATESTORY',
             'suggestedStory' : 'SUGGESTEDSTORY'
         })
 
-        smach.StateMachine.add('KEEPSTORY', KeepStory(), transitions={
+        smach.StateMachine.add('KEEPSTORY', KeepStory(subAlphaSay), transitions={
             'repeatStory':'KEEPSTORY',
             'nextEvaluation': 'EVALUATION',
             'nextGoodbye':'GOODBYE',
             'queryGeneration' : 'QUERYGENERATION'
         })
-        smach.StateMachine.add('REGENERATESTORY', RegenerateStory(),transitions={
+        smach.StateMachine.add('REGENERATESTORY', RegenerateStory(subAlphaSay),transitions={
             'clientFeedback':'CLIENTFEEDBACK'
     
         })
-        smach.StateMachine.add('SUGGESTEDSTORY', SuggestedStory(),transitions={
+        smach.StateMachine.add('SUGGESTEDSTORY', SuggestedStory(subAlphaSay),transitions={
             'clientFeedback':'CLIENTFEEDBACK'
         })
 
-        smach.StateMachine.add('QUERYGENERATION', QueryGeneration(), transitions={
+        smach.StateMachine.add('QUERYGENERATION', QueryGeneration(subAlphaSay), transitions={
             'queryGeneration_0': 'QUERYGENERATION_0',
             'queryGeneration_1' : 'QUERYGENERATION_1'
         })
 
-        smach.StateMachine.add('QUERYGENERATION_0', QueryGeneration_0(),transitions={
+        smach.StateMachine.add('QUERYGENERATION_0', QueryGeneration_0(subAlphaSay),transitions={
             'queryGenerateAnswers': 'QUERYGENERATEANSWERS'
         })
-        smach.StateMachine.add('QUERYGENERATEANSWERS', QueryGenerateAnswers(), transitions={
+        smach.StateMachine.add('QUERYGENERATEANSWERS', QueryGenerateAnswers(subAlphaSay), transitions={
             'queryInteraction': 'QUERYINTERACTION'
         })
 
-        smach.StateMachine.add('QUERYGENERATION_1', QueryGeneration_1(),transitions={
+        smach.StateMachine.add('QUERYGENERATION_1', QueryGeneration_1(subAlphaSay),transitions={
             'queryGeneration_1_manager': 'QUERYGENERATION1MANAGER'
         })
 
-        smach.StateMachine.add('QUERYGENERATION1MANAGER', QueryGeneration_1_Manager(), transitions={
+        smach.StateMachine.add('QUERYGENERATION1MANAGER', QueryGeneration_1_Manager(subAlphaSay), transitions={
             'queryGeneration_1' : 'QUERYGENERATION_1',
             'queryInteraction': 'QUERYINTERACTION'
         })
 
       
-        smach.StateMachine.add('QUERYINTERACTION', QueryInteraction(), transitions={
+        smach.StateMachine.add('QUERYINTERACTION', QueryInteraction(subAlphaSay), transitions={
             'nextEvaluation': 'EVALUATION',
             'nextGoodbye':'GOODBYE',
         })      
 
-        smach.StateMachine.add('EVALUATION', Evaluation(), transitions = {
+        smach.StateMachine.add('EVALUATION', Evaluation(subAlphaSay), transitions = {
             'nextStory': 'STORYTELLING',
             'nextGoodbye': 'GOODBYE'
 
         })
-        smach.StateMachine.add('GOODBYE', Goodbye(), transitions={
+        smach.StateMachine.add('GOODBYE', Goodbye(subAlphaSay), transitions={
             'finishState': 'outcome4'
         })
 
