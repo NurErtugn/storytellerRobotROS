@@ -3,7 +3,7 @@ from openai import OpenAI
 
 OpenAI.api_key = YOUR_API_KEY
 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = YOUR_API_KEY
 MODEL = "gpt-3.5-turbo"
 
 client = OpenAI()
