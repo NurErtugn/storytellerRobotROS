@@ -1,7 +1,7 @@
 import os 
 from openai import OpenAI
 
-OpenAI.api_key = "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"
+OpenAI.api_key = YOUR_API_KEY
 
 os.environ["OPENAI_API_KEY"] = "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"
 MODEL = "gpt-3.5-turbo"
@@ -9,7 +9,7 @@ MODEL = "gpt-3.5-turbo"
 client = OpenAI()
 
 #Generates a response given a prompt using OpenAI's GPT-3 API 
-def generate_response(prompt, content_message = "You are a helpful and friendly assistant.Babysitter: easy going, understable language, engaging, filled with curiosity, and with a fantastic plot twist to captivate children", 
+def generate_response(prompt, content_message = "You are a helpful and friendly assistant.Babysitter: easy going, understandable language, engaging, filled with curiosity, and with a fantastic plot twist to captivate children", 
                       max_tokens = 1000, n = 1): 
     #MODIFIED : content_message , added the last phrase 
     
