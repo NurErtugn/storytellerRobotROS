@@ -11,8 +11,6 @@ client = OpenAI()
 #Generates a response given a prompt using OpenAI's GPT-3 API 
 def generate_response(prompt, content_message = "You are a helpful and friendly assistant.Babysitter: easy going, understandable language, engaging, filled with curiosity, and with a fantastic plot twist to captivate children", 
                       max_tokens = 1000, n = 1): 
-    #MODIFIED : content_message , added the last phrase 
-    
     print(prompt)
     print()    
     response = client.chat.completions.create(
@@ -52,34 +50,7 @@ def complete_story(story_segment,model=MODEL, temperature=0.7, max_tokens=1000):
 
     return response.choices[0].message.content
 
-#generate story based on questions ==> used the method few shot prompting
-#def gSbA(question_segment,word_count, model= MODEL, temperature = 0.7, max_tokens = 1000):
-   # system_prompt = (f"""Given the following questions : 
-   #                  ```
-    #                 {question_segment}
-    #                 ```
-    #                 Generate a story under
-    #                 {word_count} words that would have answer to the question
-    #                 here is an example of what i'm looking for:
-   #                  Questions:What's the name of Nur's Robot ? How's the weather today? What was Robot doing when Nur woke up
-   #                  Generated Story: Today was a sunny day. Nur opened her eyes to her Robot Alpha-Mini singing a morning song for her.""")
-
-   # response = client.chat.completions.create(
-    #    model=model,
-   #     messages= [
-   #         { "role": "system",
-   #          "content" : system_prompt },
-  #      ],       
-  #      n=3,
-  #      temperature=temperature,
-  #      max_tokens=max_tokens,
- #   ) 
-
-  #  return response.choices[0].message.content
-
-
 #modify generated story 
-
 def mGs(story_segment,indications, model= MODEL, temperature = 0.7, max_tokens = 1000):
     system_prompt = (f"""The goal is to rewrite the story given, with a set of instructions.
     Story: 
@@ -108,7 +79,6 @@ def mGs(story_segment,indications, model= MODEL, temperature = 0.7, max_tokens =
     ) 
 
     return response.choices[0].message.content
-
 
 #def generate answers based on questions and the story
 def gAbQaS(story_segment,question_segment, model= MODEL, temperature = 0.7, max_tokens = 1000):
