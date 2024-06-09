@@ -1,9 +1,9 @@
 import os 
 from openai import OpenAI
 
-OpenAI.api_key = YOUR_API_KEY
+OpenAI.api_key = "YOUR_API_KEY"
 
-os.environ["OPENAI_API_KEY"] = YOUR_API_KEY
+os.environ["OPENAI_API_KEY"] = "YOUR_API_KEY"
 MODEL = "gpt-3.5-turbo"
 
 client = OpenAI()
