@@ -8,13 +8,20 @@
 	<title>Apha-Mini Storytime!</title>
 	<!-- Style taken from https://raw.githubusercontent.com/hypertexthero/htmlformtofile/master/index.html-->
 	<style type="text/css" media="screen">
-		body {font-family:verdana, sans-serif;  font-weight: 700; color:#271d1d; background:#d2e0d1; padding:20px; text-align:center;}
+		body {font-family:verdana, sans-serif;  font-weight: 700; color:#271d1d; background:#f5b0b0; padding:20px; text-align:center;}
 		h1 {font-size:50px; font-weight: bold; text-align:center; color: #920be1;}
 		label {font-size:20px;font-weight: bold;}
 		button {margin-left:205px; padding:5px; margin-top:5px; font-size:16px;}
 		textarea {width:400px; font-size:16px; font-family: courier, "courier new", monospace; margin:0 0 5px 0; padding:5px; border:1px solid #eee; }
 		select {margin:0 0 5px 0;}
 		::placeholder {color:#d4d2d2;}
+		.disabled{
+			cursor: not-allowed;
+			pointer-events: none;
+		}
+		.color-update{
+			background-color: #007bff;
+		}
 		.slider{
 			width: 400px;
 			height: 30px;
@@ -154,7 +161,7 @@
     <h1> &#x1F916; &#x1F916; Storytime with Alpha-Mini &#x1F916; &#x1F916;  !</h1>
 	<br>
 		<div id = "mainButtons-container">
-			<button id="main-button" onclick="showStory()">Start Storytime </button>
+			<button id="main-button" onclick="showStory(this)">Start Storytime </button>
 			<button id = "main-button" onclick="showHistory(this)">Show History</button> 
 			<button id = "main-button" onclick="showDescription(this)">User Guide</button> 
 
@@ -168,7 +175,7 @@
 			While this tailor-made models does storytelling with the robot Alpha-Mini, it is also possible to ask questions to children <br>
 			about the stories, and to create complete dialogs with the students. On the other side, the control is still completely on the <br>
 			user! At any point in time, user can modify or give feedback to the model to change the path of this generative model!<br>
-			Let's explore this journey together!			
+			Let's explore this journey together!
 		</div>
 	
 	<div id="language_selector" style = "display:none">
@@ -176,11 +183,11 @@
 	<br>
 
 		<input type="radio" id="en" name="language" value="0">
-    	<label for="en"> &#x1F5E3;: English</label><br>
+    	<label for="en"> &#x1F5E3;: English 🇺🇸</label><br>
     	<input type="radio" id="fr" name="language" value="1">
-    	<label for="fr"> &#x1F5E3;:Francais</label><br>  
+    	<label for="fr"> &#x1F5E3;:Francais 🇫🇷 </label><br>  
     	<input type="radio" id="de" name="language" value="2">
-    	<label for="de"> &#x1F5E3;:Deutsch</label><br><br>
+    	<label for="de"> &#x1F5E3;:Deutsch 🇩🇪</label><br><br>
 		
 		<input type="button" id="submit-button" value = "&#x1F44D; Submit" style="margin-bottom: 20px;" onclick="sendLanguageData(this)"/>
 	</div>
@@ -248,7 +255,7 @@
 	<br>
 	<p>&#x1F916;: Moving Right Along; Are you ready to generate your first story with me ? Click to "Clear All" button to restart !</p>
 	<button type="submit" id= "submit-button" onclick="sendStoryData(this)">&#x1F44D; Submit</button>
-	<button id="submit-button" onclick = "clearAll(this)"> &#x1F44E; Clear All</button>
+	<button id="submit-button" onclick = "clearAll(this)">Clear All</button>
 	
 	
     <h1>&#x1F916;: Storytelling Session</h1>
@@ -258,7 +265,6 @@
 	</div>
 
 	
-
 	<div class="button-container">	
 		<button id="editButton">Edit </button>
 		<button id="goBackButton" style="display: none;">Go back</button>
@@ -426,9 +432,11 @@ Question 3
 	var question_ai_box = document.getElementById("questions_ai")
 	var selectQuestions = document.getElementById("select_question");
 
+	//Regen with suggestions button
+	var suggestionBox = document.getElementById("suggestionBox");
+
 	selectButton.addEventListener("click", function(){
 		selectQuestions.style.display="block";
-		
 	})
 
 	regenerateButton2.addEventListener('click',regenerateQuestions);
@@ -490,6 +498,7 @@ Question 3
 			document.getElementById("buttonAfterModified").style.display= "block";
 		}
 	})
+	
 
 	keepButton2.addEventListener("click", function(){
 		const socket = new WebSocket('ws://localhost:10000');
@@ -513,17 +522,25 @@ Question 3
 		regenerateButton2.disabled=true;		
 	})
 
+	// keep button pressed tracker
+	let isPressed = false;
+
 	//if i pressed on the keep story
 	keepButton.addEventListener("click",function(){
 		regenerateButton.disabled=true;
-		suggestionButton.disabled= true;
 		editButton.disabled = true;
+		isPressed= !isPressed
+		suggestionButton.disabled=true;
 		const socket = new WebSocket('ws://localhost:10000');
 		socket.addEventListener('open', function(event){
 			socket.send("keepStory");
 			socket.close();
 		});		
 		this.disabled = true;
+
+		
+			
+		
 	});
 	
 	// edit the story click received
@@ -564,7 +581,7 @@ Question 3
         socket.addEventListener('open', function (event) {
 			var text_to_regenerate = storyPrompt.value;			
 			var message = "regenerate" + " " + text_to_regenerate; 
-			editButton.disabled = true; 
+			//editButton.disabled = true; 
 			goBackButton.disabled = true;
 			socket.send(message);	
             socket.close()
@@ -573,9 +590,7 @@ Question 3
 
 	// make the suggestion box appear
 	function suggestionBoxOnn(){
-		var suggestionBox = document.getElementById("suggestionBox");
 		suggestionBox.style.display= "block";
-
 	}
 
 	function saveStory(){
@@ -583,10 +598,23 @@ Question 3
         socket.addEventListener('open', function (event) {
 			var updateText = storyPrompt.value;			
 			var message =  updateText; 
+
 			editButton.disabled = true;
+			editButton.classList.add('disabled');
+
 			goBackButton.disabled = true;
+			goBackButton.classList.add('disabled');
+
 			regenerateButton.disabled = true;
+			regenerateButton.classList.add('disabled');
+
 			editableTextArea.style.display="none";
+
+			suggestionButton.disabled=true; // new 
+			suggestionButton.classList.add('disabled');
+
+			keepButton.classList.add('disabled');
+
 			socket.send(message);	
             socket.close()
         });
@@ -599,7 +627,6 @@ Question 3
 		document.getElementById("story_length_slider").style.display = "block";
 		document.getElementById("ageSelector").style.display="block";
 	}
-
 	function clearAll(some){
 		some.disabled=true;
 		document.getElementById('story-form').reset();
@@ -640,6 +667,11 @@ Question 3
         const socket = new WebSocket('ws://localhost:10000');
         socket.addEventListener('open', function (event) {
 			some.disabled=true;
+			some.classList.add('disabled');
+			const borderColor= getComputedStyle(some).borderColor;
+			some.style.backgroundColor= borderColor;
+
+
             var language = document.querySelector('input[name="language"]:checked').value;
 			document.getElementById("story_input").style.display = "block";
             socket.send(language);	
@@ -673,6 +705,18 @@ Question 3
 	// yes or no question event for should we generate questions for the story 
 	const sendQuestionData = (some) => {
 		some.disabled=true;
+		some.classList.add('disabled');
+
+		const borderColor= getComputedStyle(some).borderColor;
+		some.style.backgroundColor= borderColor;
+
+		const form = document.getElementById('question_selector');
+		const radioButtons = form.querySelectorAll('input[type="radio"]');
+		//Disable all buttons
+		radioButtons.forEach(radio => {
+			radio.disabled=true;
+		});
+
 		const socket =new WebSocket('ws://localhost:10000');
 		socket.addEventListener('open', function (event) {
 			var question = document.querySelector('input[name="question"]:checked').value;
@@ -712,6 +756,18 @@ Question 3
 // Picking the levels of AI help 
 	const sendAnswerData = (some) => {
 		some.disabled=true;
+		some.classList.add('disabled');
+
+		const borderColor= getComputedStyle(some).borderColor;
+		some.style.backgroundColor= borderColor;
+
+		const form = document.getElementById('answer_input');
+		const radioButtons = form.querySelectorAll('input[type="radio"]');
+		//Disable all buttons
+		radioButtons.forEach(radio => {
+			radio.disabled=true;
+		});
+
 		const socket =new WebSocket('ws://localhost:10000');
         socket.addEventListener('open', function (event) {
 			var answer = document.querySelector('input[name="ai_answer"]:checked').value;
@@ -728,17 +784,61 @@ Question 3
 		});
 	}	
 
+	//function to find if there exist a button with a certain text
+	function findButtonByText(text){
+		const buttons = document.querySelectorAll('#submit-button');
+		for(let button of buttons){
+			if(button.textContent.trim()==text){
+				return button;
+			}
+		}
+		return null;
+		}
+	
+	
+
+	
+
     const sendStoryData = (some) => {
         const socket = new WebSocket('ws://localhost:10000');
         socket.addEventListener('open', function (event) {
 			some.disabled=true;
+			some.classList.add('disabled');
+
+			const borderColor= getComputedStyle(some).borderColor;
+			some.style.backgroundColor= borderColor;
+
+			const clearText="Clear All";
+			const foundClearButton = findButtonByText(clearText);
+			if(foundClearButton){
+				console.log('found the requested button');
+				foundClearButton.classList.add('disabled');
+			} else {
+				console.log('button not found');
+			}
+
+
+
             var ai = document.querySelector('input[name="ai"]:checked').value;
-            var story = document.getElementById("story").value;
-			var length = document.getElementById("length").innerHTML;
+			story =document.getElementById("story")
+			story.readOnly= true; 
+            var story = story.value;
+			var slider = document.getElementById("length");
+			//slider.readOnly= true;
+			var length = slider.innerHTML;
 			
 			var default_level = "Early Elementary"
-			var level1 = document.querySelector('input[name="age"]:checked').value			
+			var selectedAge= document.querySelector('input[name="age"]:checked');
+			var level1 = selectedAge.value			
 			var level = level1 ? level1 : default_level
+
+			const form = document.getElementById('story-form');
+			const radioButtons = form.querySelectorAll('input[type="radio"]');
+			//Disable all buttons
+			radioButtons.forEach(radio => {
+				radio.disabled=true;
+			});
+
 
             var message = ai + "|" + story + "|"  + length + "|"+ level; 
 			// TODO: AI  level 0 message sending not working ?????????
@@ -800,7 +900,9 @@ Question 3
 
 	}
 	// function to start generating storytime
-	function showStory(){
+	function showStory(button){
+		const borderColor= getComputedStyle(button).borderColor;
+		button.style.backgroundColor= borderColor;
 		document.getElementById("language_selector").style.display = "block";
 
 	}

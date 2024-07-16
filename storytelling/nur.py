@@ -172,6 +172,7 @@ class Storytelling(smach.State):
             story_prompt=story            
         elif(ai_level == 1):
             story_prompt = ai.dSgDaG(story, level, str(sl)) 
+            #story_prompt=story    #modified 
             if language== 'fr':
                 story_prompt = ai.translate(story, 'en' , 'fr')
             elif language=='de':

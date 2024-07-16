@@ -109,9 +109,9 @@ def main(session, details):
     
     # myrobot.talk("Hello, I am testing the class comunication here.", block=False)
 
-    myrobot.talk(text="Say red, blue or green")
-    yield session.call("rie.dialogue.keyword.add",
-    keywords=["red", "blue", "green"])
+    #myrobot.talk(text="Say red, blue or green")
+    #yield session.call("rie.dialogue.keyword.add",
+    #keywords=["red", "blue", "green"])
 
     while(myrobot.alive):
         # the goal of this loop is to keep the node alive and receiving messages in the topic "robotCommand" still it is killed
@@ -153,7 +153,7 @@ transports=[{
     "url": "ws://wamp.robotsindeklas.nl",
     "serializers": ["msgpack"]
     }],
-    realm="rie.66461083f26645d6dd2bccda",
+    realm="rie.668f9993e1b5df3bc1d361c2",
 )
     
 wamp.on_join(main)
