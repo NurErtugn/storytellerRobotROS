@@ -316,9 +316,12 @@ def regenerateStory(storyPrompt,model=MODEL, temperature=0.8,max_tokens= 1000):
     return response.choices[0].message.content
 
 #giving more specific task to make it understand better. If i dont say "give answer and cite" it does generate questions that doesnt have answers in the text
-def generateQuestions(storyPrompt, model=MODEL, temperature =0.8, max_tokens=1000):
+#TODO: add a string saying that generate questions based on the lecture content or story content 
+def generateQuestions(storyPrompt, model=MODEL, temperature =0.8, max_tokens=1000): #TODO: add a string for ==> questionAbout
     system_prompt = (f"You are extremely warm and and creative babysitter, ask 3 questions that have short answers about the following story:"
     f"'{storyPrompt}'\n\n"
+   #TODO "ask question about"
+   #TODO f"'{questionAbout}'"
     "Give answer to generated questions and cite from the text")   
 
     response= client.chat.completions.create(
@@ -388,6 +391,111 @@ def translate(message, language_from = 'en', language_to = 'en'):
 #debugging purposes
 def generate_fake_response(prompt):
     return prompt
+
+#purpose: story generation based on the lecture content 
+def generate_lecture_story(story_segment,word_count, model=MODEL, temperature=0.7, max_tokens=1000):
+    system_prompt = (
+        "You are a extremely creative and friendly assistant, responsible with storifying the lectures"
+        "Your task is to remodel the lecture to a story "
+        "Here’s the lecture content : "
+         f"'{story_segment}'\n\n"
+        "Define the subject"
+        "Clearly outline the main points and key information of the given prompt "
+        "Structure your content with a clear beginning, middle, and end."
+        "Identify areas where storytelling elements (characters, setting, conflict, resolution) can be naturally integrated. "
+
+        "Tone and style : "
+        "-Educational yet engaging, with a focus on making complex concepts easy to understand."
+        "-Use dialogue and interactions to illustrate key points"
+        
+        "under"
+        f"'{word_count}'" 
+        "words" 
+        )  
+         
+  
+
+    response = client.chat.completions.create(
+        model=model,
+        messages= [ {   "role" : "system",  "content" : system_prompt },
+        ],   
+        top_p=1.0,    
+        frequency_penalty=0.0,
+        presence_penalty=0.0,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+
+    return response.choices[0].message.content
+
+#purpose : story generation based on the lecture and lecture's subtopics 
+def generate_lecture_subtopics(story_segment,word_count, model=MODEL, temperature=0.7, max_tokens=1000):
+    system_prompt = (
+        "You are a extremely creative and friendly assistant, responsible with storifying the lectures"
+        "Your task is to remodel the lecture to a story "
+        "Here’s the lecture content titles : "
+        f"'{story_segment}'\n\n"
+        "Define the subject."
+        "Clearly outline the main subtitles and provide explanation  throughout out the story"
+        "Structure your content with a clear beginning, middle, and end."
+        "Identify areas where storytelling elements (characters, setting, conflict, resolution) can be naturally integrated. "
+
+        "Tone and style : "
+        "-Educational yet engaging, with a focus on making complex concepts easy to understand."
+        "-Use dialogue and interactions to illustrate key points"
+        
+        "under"
+        f"'{word_count}'" 
+        "words" )  
+
+    response = client.chat.completions.create(
+        model=model,
+        messages= [ {   "role" : "system",  "content" : system_prompt },
+        ],   
+        top_p=1.0,    
+        frequency_penalty=0.0,
+        presence_penalty=0.0,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+ 
+    return response.choices[0].message.content
+
+#purpose: story generation based on the lecture topic
+def generate_lecture_topic(story_segment,word_count, model=MODEL, temperature=0.7, max_tokens=1000):
+    system_prompt = (
+        "You are a extremely creative and friendly assistant, responsible with storifying the lectures"
+        "Your task is to remodel the lecture to a story "
+        "Here’s the lecture titles : "
+        f"'{story_segment}'\n\n"
+        "Define the subject."
+        "Define the subheading of the topic for the beginner level "
+        "Clearly outline the main subtitles and provide explanation  throughout out the story"
+        "Structure your content with a clear beginning, middle, and end."
+        "Identify areas where storytelling elements (characters, setting, conflict, resolution) can be naturally integrated. "
+
+        "Tone and style : "
+        "-Educational yet engaging, with a focus on making complex concepts easy to understand."
+        "-Use dialogue and interactions to illustrate key points"
+        
+        "under"
+        f"'{word_count}'" 
+        "words"
+    )  
+
+    response = client.chat.completions.create(
+        model=model,
+        messages= [ {   "role" : "system",  "content" : system_prompt },
+        ],   
+        top_p=1.0,    
+        frequency_penalty=0.0,
+        presence_penalty=0.0,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+ 
+    return response.choices[0].message.content
+
 
 #debugging purposes
 if __name__ == '__main__':

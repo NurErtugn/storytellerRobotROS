@@ -201,6 +201,33 @@ class Storytelling(smach.State):
                 story_prompt= ai.gSbA(story+ "In German", level,str(sl))
             else:
                 story_prompt= ai.gSbA(story,level, str(sl))
+
+        elif(ai_level==5):
+            if language == 'fr':
+                story_prompt= ai.translate(ai.generate_lecture_story(story,str(sl)),'en', 'fr')
+            elif(language!='en'):
+                story_prompt= ai.generate_lecture_story(story+ "In German",str(sl))
+            else:
+                story_prompt= ai.generate_lecture_story(story, str(sl))
+
+        elif(ai_level==6):
+            if language == 'fr':
+                story_prompt= ai.translate(ai.generate_lecture_subtopics(story, str(sl)),'en', 'fr')
+            elif(language!='en'):
+                story_prompt= ai.generate_lecture_subtopics(story+ "In German",str(sl))
+            else:
+                story_prompt= ai.generate_lecture_subtopics(story, str(sl))
+
+        elif(ai_level==7):
+            if language == 'fr':
+                story_prompt= ai.translate(ai.generate_lecture_topic(story, str(sl)),'en', 'fr')
+            elif(language!='en'):
+                story_prompt= ai.generate_lecture_topic(story+ "In German",str(sl))
+            else:
+                print("[BEFORE]generating story based on the lecture topic")
+                story_prompt= ai.generate_lecture_topic(story, str(sl))
+                print("[AFTER]generating story based on the lecture topic")
+
             
             
         #sentences_with_sentiment = classifier.classify(story_prompt, AUTO_SPLIT)
