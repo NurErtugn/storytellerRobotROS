@@ -1,0 +1,388 @@
+<!---this page comes after the beginning page
+but what it does ?
+starts by buttons; 
+    1) generate story: 2 buttons/ options pop out i) generate story[third_1.html] ii) storify your lecture [third_2.html]
+    2) see previously generated stories
+    3) read guidelines
+
+
+-->
+
+<head>
+    <meta charset="utf-8">
+	<meta http-equiv="Cache-control" content="public">
+
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>Apha-Mini Storytime!</title>
+	<!-- Style taken from https://raw.githubusercontent.com/hypertexthero/htmlformtofile/master/index.html-->
+	<style type="text/css" media="screen">
+		body {font-family:verdana, sans-serif;  font-weight: 700; color:#271d1d; background:#f5b0b0; padding:20px; text-align:center;}
+		h1 {font-size:50px; font-weight: bold; text-align:center; color: #920be1;}
+		label {font-size:20px;font-weight: bold;}
+		button {margin-left:205px; padding:5px; margin-top:5px; font-size:16px;}
+		textarea {width:400px; font-size:16px; font-family: courier, "courier new", monospace; margin:0 0 5px 0; padding:5px; border:1px solid #eee; }
+		select {margin:0 0 5px 0;}
+		::placeholder {color:#d4d2d2;}
+		.disabled{
+			cursor: not-allowed;
+			pointer-events: none;
+		}
+		.color-update{
+			background-color: #007bff;
+		}
+		.slider{
+			width: 400px;
+			height: 30px;
+			background: #d3d3d3;
+			outline: none;
+			opacity: 0.7;
+			-webkit-transition: .2s;
+			transition: opacity .2s;
+		}
+
+		.container{
+			display: flex;
+			justify-content: space-around;
+			margin-bottom: 10px;
+		}
+
+		textarea{
+			width: 75%;
+			height: 100px;
+			margin-top: 10px; 
+			background-color: #fff9c4;
+			overflow-y: hidden; 
+					
+		}
+
+		#storyPrompt {
+			background-color: #F2F2F2;
+		}
+		#editableText{
+			background-color:#fff9c4;
+			display: none;
+		}
+
+		.button-container {
+			text-align: center;
+			margin-top: 10px;
+		}
+		button{
+			margin: 5px;
+			padding: 5px  10px;
+			font-family: Arial, Helvetica, sans-serif;
+			font-weight: 900;
+			padding: 15px;
+			letter-spacing: 1px;
+			font-size: 20px;
+			background-color: #7cbcff;
+			border: 5px solid rgb(248, 149,s 19);
+			cursor: pointer; /*cursor to hand pointer*/			
+		}
+		button:hover{
+			background-color: #007bff;
+		}
+		#submit-button:hover{
+			background-color: #ffb74d;
+		}	
+		
+		#mainButtons-container{
+			text-align: center;
+			padding: 20px;
+		}
+
+        #mainButtonscontainer2{
+			text-align: center;
+			padding: 20px;
+		}
+		#main-button{
+			font-family: Arial, Helvetica, sans-serif;
+			font-weight: 900;
+			padding: 50px;
+			letter-spacing: 1px;
+			font-size: 40px;
+			background-color: rgb(244, 159, 231);
+			border: 5px solid blueviolet;
+			cursor: pointer; /*cursor to hand pointer*/
+		}
+		#main-button:hover{
+			background-color: blueviolet;
+		}
+		#submit-button{
+			font-family: Arial, Helvetica, sans-serif;
+			font-weight: 900;
+			padding: 15px;
+			letter-spacing: 1px;
+			font-size: 20px;
+			background-color: rgb(255, 220, 78);
+			border: 5px solid rgb(248, 149,19);
+			cursor: pointer; /*cursor to hand pointer*/			
+		}
+		#submit-button:hover{
+			background-color: rgb(248, 149, 19);
+		}
+
+		.container2 {
+			max-width: 600px;
+			margin: 0 auto;
+			padding: 20px;
+			}
+
+		.button2 {
+			padding: 10px 20px;
+			border: none;
+			background-color: #6daeff;
+			color: #fcfcfc;
+			border-radius: 5px;
+			cursor: pointer;
+			margin-top: 10px;
+		}
+
+		.button2:hover {
+			background-color: #1d34aa;
+		}
+
+		.button-group2 {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.header2 {
+			font-size: 20px;
+			font-weight: bold;
+			margin-bottom: 20px;
+		}
+
+		.checkbox-label, .radio-label {
+			display:list-item;
+			margin-bottom: 10px;
+			padding: 5px;
+			background-color: #b6ebdf;
+			border-radius: 5px;
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+		}
+
+		.checkbox-label:hover, .radio-label:hover {
+			background-color: #12a1c4;
+		}
+
+		.container_form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            width: 100%;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        h2 {
+            color: #6a1b9a;
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 30px;
+        }
+        .sub-title {
+            color: #6a1b9a;
+            text-align: center;
+            font-size: 1em;
+            background: #6a1b9a;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: -20px auto 30px auto;
+            display: inline-block;
+        }
+        .question {
+            margin-bottom: 30px;
+            position: relative;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .highlight {
+            background-color: #b3e5fc;
+        }
+        .question label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .slider_form {
+            width: 100%;
+            margin: 0 10px;
+        }
+        .label_form {
+            display: flex;
+            align-items: center;
+        }
+        .label_form span {
+            margin-left: 5px;
+            font-weight: bold;
+            color: #6a1b9a;
+        }
+        .comments {
+            margin-bottom: 30px;
+        }
+        .comments textarea {
+            width: 100%;
+            height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1em;
+            resize: vertical;
+        }
+       
+        .submit-btn {
+            background-color: #6a1b9a;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background-color 0.3s ease;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+        .submit-btn:hover {
+            background-color: #4a148c;
+        }
+        .blue { background-color: #b3e5fc; }
+        .green { background-color: #c8e6c9; }
+        .yellow { background-color: #fff9c4; }
+        .orange { background-color: #ffe0b2; }
+        .purple { background-color: #d1c4e9; }
+        .pink { background-color: #f8bbd0; }
+		
+	</style>
+</head>
+ 
+<body >
+    <h1> &#x1F916; &#x1F916; Storytime with Alpha-Mini &#x1F916; &#x1F916;  !</h1>
+	<br>
+		<div id = "mainButtons-container">
+			<button id="main-button" onclick="showStory(this)">Start Storytime </button>
+			<button id = "main-button" onclick="showHistory(this)">Show History</button> 
+			<button id = "main-button" onclick="showDescription(this)">User Guide</button> 
+
+		</div>
+        <!--we see these buttons once start storytime is clicked-->
+        <div id = "mainButtonscontainer2" style="display:none" >
+			<button id="main-button" onclick="generateStory(this)">Generate Story </button>
+			<button id = "main-button" onclick="storifyLectures(this)" >Storify Lectures</button> 
+		</div>
+		<!--Area to show saved history-->
+		<div id="savedHistory"></div>	
+		<div id="userGuide" style ="display:none;">
+			Welcome to Alpha-Mini Story Generation. We believe that storytelling has a huge power in teaching and children  <br>
+			developpement . Hence this model promotes two  main functions: generating stories for different age group and levels, <br>
+			and storyfying the teaching course content with the help of artificial intelligence while storyfying the content. <br>
+			While this tailor-made models does storytelling with the robot Alpha-Mini, it is also possible to ask questions to children <br>
+			about the stories, and to create complete dialogs with the students. On the other side, the control is still completely on the <br>
+			user! At any point in time, user can modify or give feedback to the model to change the path of this generative model!<br>
+			Let's explore this journey together!
+		</div>
+	
+	
+	<button onclick="stopServer()">Exit</button>
+	
+	
+	
+	</div>
+</body>
+ 
+<script>
+	// we go to story generation phase if the user chose to generate a story
+    function generateStory(button){
+        window.location.href = 'third_2.html';// redirecting the page
+    }
+
+    //we  go to storify lectures phase if the user chose to storify the lecture content
+    function storifyLectures(button){
+        window.location.href = 'third_1.html';
+    }
+
+
+
+    const stopServer = () => {
+        window.location.href = 'survey.html'; // Redirect to the survey page
+    }
+
+	// function to start generating storytime
+	function showStory(button){
+		const borderColor= getComputedStyle(button).borderColor;
+		button.style.backgroundColor= borderColor;
+
+        //when the start story creation is clicked user has 2 options they pop up
+        document.getElementById("mainButtonscontainer2").style.display="block";
+
+	}
+	// function to show project description for the users 
+	function showDescription(button){
+		const guide = document.getElementById('userGuide');
+		if(button.innerText==="User Guide"){
+			guide.style.display='block';
+			button.innerText= "Close";
+		}else if(button.innerText==="Close"){
+			guide.style.display='none';
+			button.innerText = "User Guide";
+		}
+
+	}
+
+	// function to see previously saved things
+	function showHistory(button){
+		console.log("show Entries function is called ");
+		const entryArea = document.getElementById('savedHistory');
+		const entryThings = JSON.parse(localStorage.getItem('sessionEntry')) || [];
+		console.log("Entries retrieved:", entryThings);
+		// sort entries by timestamp in decreasing order 
+		entryThings.sort((current,next) => new Date(current.timestamp)- new Date(next.timestamp));
+
+		const savedHistory = document.getElementById('savedHistory')
+
+		// change the text of the button
+		if(button.innerText === "Show History"){
+			button.innerText = "Close";
+			// generate entry block  for each entry
+			entryArea.innerHTML = entryThings.map(prompt => `
+			<div >
+				<h4>Saved on: ${prompt.date}</h4>
+				<p>Story Topic : ${prompt.storyValue || "Story topic is not specified"}</p>
+				<p>Story : ${prompt.storyPrompt || "Story not generated"}</p>
+				<p>Human Generated questions: ${prompt.humanQuery || "Questions are not generated"}</p>
+				<p>Autogenerated questions: ${prompt.aiQuery || "Questions are not generated"}</p>
+				<p>______________________________________________________________________________________________________________________________________________________</p>
+			</div>
+			`).join(' ');	
+			savedHistory.style.display= 'block';	 
+		}else if(button.innerText=== "Close"){
+			//<div id="savedHistory"></div>	
+			savedHistory.style.display= 'none';
+			button.innerText ="Show History";
+	
+		}
+		else{
+			button.innerText ="Show History";
+		}
+
+	
+
+	}
+	
+
+</script>
+ 
+</html>
+

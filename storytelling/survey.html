@@ -416,7 +416,7 @@
 
 		};
 
-		dictstring = JSON.stringify(dict);
+	
 		console.log(dict);
 
 		/*
@@ -426,7 +426,7 @@
 
 		const socket =new WebSocket('ws://localhost:10000');
         socket.addEventListener('open', function (event) {
-			socket.send("Feedback " + dictstring );  
+			socket.send(JSON.stringify(dict));  
 			socket.close();	
 		});
 

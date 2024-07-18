@@ -667,26 +667,37 @@ class Goodbye(smach.State):
         local_data = server.await_response()
         print("LOCAL DATA RECIEVED in the GOODBYE STATE: ", local_data) 
 
-        dictionary = local_data
-        file_path = 'sample.json'
+        # {"story_accuracy":"5","story_suitable":"5","class_integration":"5","query_accuracy":"5","query_suitable":"5","query_objective":"5","user_comments":"test"}
+        #my local data returned from the survey.html looks like this this is a string 
+        #to transform it to a dictionary use json it does the job
+        dictionary = json.loads(local_data)
 
-        #if the file exists 
-        if os.path.exists(file_path):
-           print(file_path)
-           #TODO: doesnt work
-        
-        #if this file doesnt exist 
+        filename =  'nurAmazing.json'
+
+        #print("TYPE OF THE DICTIONARY VARIABLE")
+        #print(type(dictionary))
+
+        if os.path.exists(filename):
+        # File exists, read its content
+            with open(filename, 'r') as file:
+                try:
+                    data = json.load(file)
+                    if isinstance(data, list):
+                        # Append the new dictionary to the existing list
+                        data.append(dictionary)
+                    else:
+                        # If data is not a list, wrap it in a list and append the new dictionary
+                        data = [data, dictionary]
+                except json.JSONDecodeError:
+                    # If file is empty or contains invalid JSON, initialize with an empty list
+                    data = [dictionary]
         else:
-            # Serializing json
-            json_object = json.dumps(dictionary, indent=4)
-                
-                # Writing to sample.json
-            with open("sample.json", "w") as outfile:
-                outfile.write(json_object)
-                
-       
+            # File does not exist, initialize with the new dictionary in a list
+            data = [dictionary]
 
-       
+        # Write the updated data back to the file
+        with open(filename, 'w') as file:
+            json.dump(data, file, indent=4)
        
         return 'finishState'
     
