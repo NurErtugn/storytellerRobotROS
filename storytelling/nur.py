@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false" #MODIFIED FOR THE PURPOSE TO GET RID OF HUGGING FACE DEADLICK ERROR
 from pynput.keyboard import Key, Listener # functions for controlling the keyboard  & mice
@@ -653,14 +654,42 @@ class Evaluation(smach.State):
 class Goodbye(smach.State):
     def __init__(self,subAlphaSay):
         smach.State.__init__(self, outcomes=['finishState'])
-        self.subAlphaSay= subAlphaSay
+        self.subAlphaSay= subAlphaSay   
+
+
 
     def execute(self, userdata):
         robot.showEmotion(sentiment.JOYFUL)
         message = "Thank you for your attention! I hope you learned a lot. See you next time!"
         # translated = "Merci pour votre attention! J'espère que vous avez beaucoup appris. À la prochaine!"
         qt_says(ai.translate(message, language_to=language))
+
+        local_data = server.await_response()
+        print("LOCAL DATA RECIEVED in the GOODBYE STATE: ", local_data) 
+
+        dictionary = local_data
+        file_path = 'sample.json'
+
+        #if the file exists 
+        if os.path.exists(file_path):
+           print(file_path)
+           #TODO: doesnt work
+        
+        #if this file doesnt exist 
+        else:
+            # Serializing json
+            json_object = json.dumps(dictionary, indent=4)
+                
+                # Writing to sample.json
+            with open("sample.json", "w") as outfile:
+                outfile.write(json_object)
+                
+       
+
+       
+       
         return 'finishState'
+    
     
 def main():
 
@@ -745,9 +774,11 @@ def main():
     print("Starting the server")
     server.start_thread()
     print("Started the server")
+    begin_html= os.path.abspath('/home/storytelling/catkin_ws/src/storytelling/begin.html') #NEW
     index_html =os.path.abspath('/home/storytelling/catkin_ws/src/storytelling/index.html')
     print("Opening:", index_html)
-    webbrowser.open_new_tab(index_html) 
+    #webbrowser.open_new_tab(index_html)  #NEW
+    webbrowser.open_new_tab(begin_html) #NEW
     print("served the page")
     config_language()
     print("configured the lang")
