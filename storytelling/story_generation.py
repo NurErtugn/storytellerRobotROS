@@ -1,9 +1,9 @@
 import os 
 from openai import OpenAI
 #TODO. DONT USE STORYPOINTS MENTION IT IN THE PROMPT FOR LECTURE GEN 
-OpenAI.api_key = "sk-robot-daniel-FOQfOlJ9dCGtSLaSTq2RT3BlbkFJ3fiAo6v08Aflm70zQmss"
+OpenAI.api_key = "YOUR_KEY"
 
-os.environ["OPENAI_API_KEY"] = "sk-robot-daniel-FOQfOlJ9dCGtSLaSTq2RT3BlbkFJ3fiAo6v08Aflm70zQmss"
+os.environ["OPENAI_API_KEY"] = "YOUR_KEY"
 MODEL = "gpt-3.5-turbo"
 
 client = OpenAI()
